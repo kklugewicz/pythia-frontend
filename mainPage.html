@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYTHIA ASSET ANALYSIS</title>
+<style>
+    body {
+        font-family: 'Times New Roman', Times, serif, sans-serif;
+        text-align: center;
+        background-color: rgb(216, 211, 186); 
+        margin: 0; 
+        padding: 0; 
+        display: flex; 
+        flex-direction: column; 
+        min-height: 100vh; 
+    }
+    #title {
+        font-size: 24px;
+        margin-top: 20px;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    #website_description {
+        font-size: 16px;
+        margin-top: 20px;
+        text-align: center; 
+    }
+    #tickerInput {
+        margin-top: 20px;
+        padding: 5px;
+        font-size: 16px;
+        width: 145px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #image {
+        margin-top: 70px;
+        margin-right: auto;
+        margin-left: auto;
+        width: 140px;
+    }
+    footer {
+        margin-top: auto; 
+        background-color: #333; 
+        color: #fff; 
+        padding: 20px; 
+    }
+    .output {
+        display: flex;
+        justify-content: center;
+        margin-right: auto;
+        margin-left: auto;
+        text-align: center;
+        margin: 0 auto;
+    }
+    .table-caption {
+        font-size: 30px;
+        font-weight: bold;
+        }
+</style>
+</head>
+<body>
+    <img id="image" src="logo.png">
+    <div id="title">Pythia Asset Analysis</div>
+    <form id="tickerForm">
+        <input type="text" id="ticker" placeholder="Enter ticker symbol">
+        <button type="submit"> Generate </button>
+    </form>    
+    <br>
+    <div id="output"> </div>
+    <div id="website_description"> </div>
+    <script src="website_description.js"></script>
+    <script src="tableMake.js"> </script>
+    <footer>
+        &copy; 2024 Pythia Asset Analysis. All rights reserved.
+    </footer>
+</body>
+</html>
