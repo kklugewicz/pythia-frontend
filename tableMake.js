@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var input = document.getElementById("ticker").value;
         console.log("Ticker input value:", input);
         var data = {'ticker': input};
-        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        fetch('http://127.0.0.1:5000/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -29,28 +29,30 @@ document.addEventListener("DOMContentLoaded", function() {
     
     function main(data) {
         var output = document.getElementById("output");
+        var compareButtonDiv = document.getElementById("compare-button");
+        var companyName = document.getElementById("company-title");
         output.innerHTML = "";
-        var newline = document.createElement("br");
-        output.appendChild(newline);
+        compareButtonDiv.innerHTML = "";
         var inputBox = document.createElement("input");
         inputBox.type = "text";
         inputBox.placeholder = "Enter tickers to compare:";
         inputBox.id = "compareInput"; // Assign an ID to the input box
-        output.appendChild(inputBox);
+        compareButtonDiv.appendChild(inputBox);
         
         var compareButton = document.createElement("button");
         compareButton.innerHTML = "Compare";
         
         compareButton.addEventListener("click", function(event) {
             event.preventDefault();
-            var outputDiv = document.getElementById("output");
+            var outputDiv = document.getElementById("compare-button");
             var inputValue = outputDiv.querySelector("#compareInput").value;
             var data1=data
             fetchData2(inputValue, data1); // Pass inputValue and data to fetchData2
     });
         // Append the compare button to the output div
-        output.appendChild(compareButton);
-        
+        compareButtonDiv.appendChild(compareButton);
+        var companyName=data["Company Name"]
+        addTitle(companyName)
         title='Income Statement'
         var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
         var IS=data["IS"]
@@ -75,6 +77,10 @@ document.addEventListener("DOMContentLoaded", function() {
         categoryOrder = ['Current Stock Price','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
         var Valuations=data["Valuations"]
         createTable(Valuations,categoryOrder,title)
+    }
+
+    function addTitle(title) {
+        document.getElementById("company-title").innerHTML=title
     }
 
     function createTable(data,categoryOrder,title) {
@@ -200,7 +206,7 @@ function openBox(header) {
 function fetchData2(inputValue,data1){
     console.log("Ticker input value:", inputValue);
     var data = {'ticker': inputValue};
-    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+    fetch('http://127.0.0.1:5000/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -217,43 +223,49 @@ function fetchData2(inputValue,data1){
 }
 
 function compareFunction(data1,data,inputValue) {
-    console.log("Data 1:", data1);
-    console.log("Data 2:", data);
     var output = document.getElementById("output");
+    var compareButtonDiv = document.getElementById("compare-button");
+    var companyName = document.getElementById("company-title");
+    var mainCompany = data1["Company Name"];
+    var compareCompany = data["Company Name"]
     output.innerHTML = "";
+    compareButtonDiv.innerHTML = "";
+    companyName.innerHTML="";
+    var divToDelete = document.getElementById("new-line");
+    divToDelete.parentNode.removeChild(divToDelete);
     title='Income Statement'
     var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     var IS1=data1["IS"]
     var IS2=data["IS"]
-    createCompareTable(IS1,IS2,categoryOrder,title,inputValue)
+    createCompareTable(IS1,IS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Assets'
     categoryOrder = ['Cash And Cash Equivalents','Inventory', 'Receivables','Current Assets','Current Ratio','Fixed Asset Turnover Ratio','Total Non Current Assets','Total Assets','Return on Asset Ratio'];
     var ABS1=data1["ABS"]
     var ABS2=data["ABS"]
-    createCompareTable(ABS1,ABS2,categoryOrder,title,inputValue)
+    createCompareTable(ABS1,ABS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Liabilities'
     categoryOrder = ['Payables And Accrued Expenses','Current Debt', 'Long Term Debt','Current Liabilities','Total Non Current Liabilities Net Minority Interest','Total Liabilities Net Minority Interest','Net Debt','Total Debt','Debt to Shareholders Equity Ratio'];
     var LBS1=data1["LBS"]
     var LBS2=data["LBS"]
-    createCompareTable(LBS1,LBS2,categoryOrder,title,inputValue)
+    createCompareTable(LBS1,LBS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Treasuries'
     categoryOrder = ['Common Stock','Retained Earnings','Stockholders Equity','Return on Shareholders Equity'];
     var TBS1=data1["TBS"]
     var TBS2=data["TBS"]
-    createCompareTable(TBS1,TBS2,categoryOrder,title,inputValue)
+    createCompareTable(TBS1,TBS2,categoryOrder,title,mainCompany,compareCompany)
     title='Cashflow Statement'
     categoryOrder = ['Free Cash Flow','Net Income','Net Income From Continuing Operations','Capital Expenditures %', 'Net Common Stock Issuance'];
     var CF1=data1["CF"]
     var CF2=data["CF"]
-    createCompareTable(CF1,CF2,categoryOrder,title,inputValue)
+    createCompareTable(CF1,CF2,categoryOrder,title,mainCompany,compareCompany)
     title='Valuation Models'
     categoryOrder = ['Current Stock Price','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
     var Valuations1=data1["Valuations"]
     var Valuations2=data["Valuations"]
-    createCompareTable(Valuations1,Valuations2,categoryOrder,title)
+    createCompareTable(Valuations1,Valuations2,categoryOrder,title,mainCompany,compareCompany)
 }
 
-function createCompareTable(data1, data2, categoryOrder, title,inputValue) {
+function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compareCompany) {
     var tableContainer = document.getElementById("output");
     //Create variables for table elements
     var table = document.createElement('table');
@@ -293,7 +305,16 @@ function createCompareTable(data1, data2, categoryOrder, title,inputValue) {
 
     thead.appendChild(headerRow);
     table.appendChild(thead);
-
+    
+    // Create row for "main company"
+    var mainCompanyRow = document.createElement('tr');
+    var mainCompanyCell = document.createElement('td');
+    mainCompanyCell.textContent = mainCompany;
+    mainCompanyCell.style.border = "1px solid black";
+    mainCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
+    mainCompanyRow.appendChild(mainCompanyCell);
+    tbody.appendChild(mainCompanyRow);
+    
     // Create table body for data1
     Object.keys(data1).forEach(function (year) {
         var yearData = data1[year];
@@ -317,7 +338,7 @@ function createCompareTable(data1, data2, categoryOrder, title,inputValue) {
     // Create row for "Other company"
     var otherCompanyRow = document.createElement('tr');
     var otherCompanyCell = document.createElement('td');
-    otherCompanyCell.textContent = inputValue;
+    otherCompanyCell.textContent = compareCompany;
     otherCompanyCell.style.border = "1px solid black";
     otherCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
     otherCompanyRow.appendChild(otherCompanyCell);
@@ -351,3 +372,77 @@ function createCompareTable(data1, data2, categoryOrder, title,inputValue) {
     tableContainer.appendChild(table);
 }
 
+// Function to read conditions from text file
+function readConditionsFromFile(filename) {
+    return fetch(filename)
+        .then(response => response.text())
+        .then(data => {
+            // Split the content by '!' to separate different sections
+            var sections = data.split('!');
+            var conditions = {};
+            
+            // Iterate through each section
+            sections.forEach(section => {
+                var lines = section.split('\n'); // Split section into lines
+                var columnName = lines[0].trim(); // First line is the column name
+                conditions[columnName] = {}; // Initialize conditions for this column
+                
+                // Iterate through lines starting from the second line
+                for (var i = 1; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (line.startsWith('G:')) {
+                        conditions[columnName].greaterThan = parseFloat(line.substring(2));
+                    } else if (line.startsWith('R:')) {
+                        conditions[columnName].lessThan = parseFloat(line.substring(2));
+                    }
+                }
+            });
+            
+            return conditions;
+        })
+        .catch(error => {
+            console.error('Error reading conditions:', error);
+            return {};
+        });
+}
+
+function applyHighlighting(captionText, columnName, value) {
+    // Read conditions from file
+    readConditionsFromFile("highlight_conditions.text")
+    .then(conditions => {
+        // Escape special characters in the column name and caption text
+        var escapedColumnName = columnName.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
+        var escapedCaptionText = captionText.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
+        
+        // Get the cell corresponding to the value within the specified table
+        console.log(captionText)
+        console.log(columnName)
+        console.log(value)
+        var escapedId = columnName.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
+        var cell = document.querySelector(`caption:contains('${escapedCaptionText}') ~ table #${escapedId} td:nth-child(${parseInt(value) + 1})`);
+        if (!cell) return; // Cell not found
+
+        // Apply highlighting based on conditions
+        if (conditions[columnName]) {
+            var { greaterThan, lessThan } = conditions[columnName];
+            if (greaterThan !== undefined && lessThan !== undefined) {
+                if (value > greaterThan && value < lessThan) {
+                    cell.style.backgroundColor = 'yellow';
+                } else if (value > greaterThan) {
+                    cell.style.backgroundColor = 'green';
+                } else if (value < lessThan) {
+                    cell.style.backgroundColor = 'red';
+                }
+            } else if (greaterThan !== undefined) {
+                if (value > greaterThan) {
+                    cell.style.backgroundColor = 'green';
+                }
+            } else if (lessThan !== undefined) {
+                if (value < lessThan) {
+                    cell.style.backgroundColor = 'red';
+                }
+            }
+        }
+    })
+    .catch(error => console.error('Error applying highlighting:', error));
+}

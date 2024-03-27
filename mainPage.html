@@ -25,6 +25,7 @@
         font-size: 16px;
         margin-top: 20px;
         text-align: center; 
+        margin-bottom: 20px;
     }
     #tickerInput {
         margin-top: 20px;
@@ -58,6 +59,13 @@
         font-size: 30px;
         font-weight: bold;
         }
+    #company-title {
+        margin-right: auto;
+        margin-left: auto;
+        font-size: 30px;
+        font-weight: bold;
+        text-decoration: underline;
+    }
 </style>
 </head>
 <body>
@@ -67,7 +75,10 @@
         <input type="text" id="ticker" placeholder="Enter ticker symbol">
         <button type="submit"> Generate </button>
     </form>    
-    <br>
+    <div id="new-line"><br></div>
+    <div id="compare-button"></div>
+    <div id="new-line1"><br></div>
+    <div id="company-title"></div>
     <div id="output"> </div>
     <div id="website_description"> </div>
     <script src="website_description.js"></script>
