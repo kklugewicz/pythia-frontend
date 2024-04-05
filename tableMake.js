@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var companyName=data["Company Name"]
         addTitle(companyName)
         title='Income Statement'
-        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
+        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'EBITDA','Basic EPS', 'Net Earnings to Total'];
         var IS=data["IS"]
         createTable(IS,categoryOrder,title)
         title='Balance Sheet: Assets'
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var CF=data["CF"]
         createTable(CF,categoryOrder,title)
         title='Valuation Models'
-        categoryOrder = ['Current Stock Price','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
+        categoryOrder = ['Current Stock Price', 'Market Cap','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
         var Valuations=data["Valuations"]
         createTable(Valuations,categoryOrder,title)
     }
@@ -136,8 +136,10 @@ document.addEventListener("DOMContentLoaded", function() {
             categoryOrder.forEach(function (category, index) {
                 var cell = document.createElement('td');
                 var value = yearData[category];
+    
                 cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
                 cell.style.border = "1px solid black";
+                cell.style.backgroundColor = getColorForValue(value,category,year);
                 row.appendChild(cell);
             });
 
@@ -234,7 +236,7 @@ function compareFunction(data1,data,inputValue) {
     var divToDelete = document.getElementById("new-line");
     divToDelete.parentNode.removeChild(divToDelete);
     title='Income Statement'
-    var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
+    var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'EBITDA','Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     var IS1=data1["IS"]
     var IS2=data["IS"]
     createCompareTable(IS1,IS2,categoryOrder,title,mainCompany,compareCompany)
@@ -259,7 +261,7 @@ function compareFunction(data1,data,inputValue) {
     var CF2=data["CF"]
     createCompareTable(CF1,CF2,categoryOrder,title,mainCompany,compareCompany)
     title='Valuation Models'
-    categoryOrder = ['Current Stock Price','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
+    categoryOrder = ['Current Stock Price', 'Market Cap','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
     var Valuations1=data1["Valuations"]
     var Valuations2=data["Valuations"]
     createCompareTable(Valuations1,Valuations2,categoryOrder,title,mainCompany,compareCompany)
@@ -329,6 +331,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
             var value = yearData[category];
             cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
             cell.style.border = "1px solid black";
+            cell.style.backgroundColor = getColorForValue(value,category,year);
             row.appendChild(cell);
         });
 
@@ -360,6 +363,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
             var value = yearData[category];
             cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
             cell.style.border = "1px solid black";
+            cell.style.backgroundColor = getColorForValue(value,category,year);
             row.appendChild(cell);
         });
 
@@ -372,77 +376,112 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
     tableContainer.appendChild(table);
 }
 
-// Function to read conditions from text file
-function readConditionsFromFile(filename) {
-    return fetch(filename)
-        .then(response => response.text())
-        .then(data => {
-            // Split the content by '!' to separate different sections
-            var sections = data.split('!');
-            var conditions = {};
-            
-            // Iterate through each section
-            sections.forEach(section => {
-                var lines = section.split('\n'); // Split section into lines
-                var columnName = lines[0].trim(); // First line is the column name
-                conditions[columnName] = {}; // Initialize conditions for this column
-                
-                // Iterate through lines starting from the second line
-                for (var i = 1; i < lines.length; i++) {
-                    var line = lines[i].trim();
-                    if (line.startsWith('G:')) {
-                        conditions[columnName].greaterThan = parseFloat(line.substring(2));
-                    } else if (line.startsWith('R:')) {
-                        conditions[columnName].lessThan = parseFloat(line.substring(2));
-                    }
-                }
-            });
-            
-            return conditions;
-        })
-        .catch(error => {
-            console.error('Error reading conditions:', error);
-            return {};
-        });
-}
-
-function applyHighlighting(captionText, columnName, value) {
-    // Read conditions from file
-    readConditionsFromFile("highlight_conditions.text")
-    .then(conditions => {
-        // Escape special characters in the column name and caption text
-        var escapedColumnName = columnName.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
-        var escapedCaptionText = captionText.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
-        
-        // Get the cell corresponding to the value within the specified table
-        console.log(captionText)
-        console.log(columnName)
-        console.log(value)
-        var escapedId = columnName.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g,'\\$1');
-        var cell = document.querySelector(`caption:contains('${escapedCaptionText}') ~ table #${escapedId} td:nth-child(${parseInt(value) + 1})`);
-        if (!cell) return; // Cell not found
-
-        // Apply highlighting based on conditions
-        if (conditions[columnName]) {
-            var { greaterThan, lessThan } = conditions[columnName];
-            if (greaterThan !== undefined && lessThan !== undefined) {
-                if (value > greaterThan && value < lessThan) {
-                    cell.style.backgroundColor = 'yellow';
-                } else if (value > greaterThan) {
-                    cell.style.backgroundColor = 'green';
-                } else if (value < lessThan) {
-                    cell.style.backgroundColor = 'red';
-                }
-            } else if (greaterThan !== undefined) {
-                if (value > greaterThan) {
-                    cell.style.backgroundColor = 'green';
-                }
-            } else if (lessThan !== undefined) {
-                if (value < lessThan) {
-                    cell.style.backgroundColor = 'red';
-                }
-            }
+function getColorForValue(value,category,year) {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+        return ''
+    };
+    if (typeof value !== 'number') {
+        var num = parseFloat(value.replace(/[^0-9.-]/g, ''));
+    };
+    var valueRange={
+        'SGA%': {
+            'topIdealRange': 30,
+            'bottomIdealRange': '',
+            'bufferValue': 70
+        },
+        'R&D%': {
+            'topIdealRange': 30,
+            'bottomIdealRange': '',
+            'bufferValue': 70
+        },
+        'Depreciation %': {
+            'topIdealRange':10,
+            'bottomIdealRange': '',
+            'bufferValue':10
+        },
+        'Net Earnings to Total': {
+            'topIdealRange':'',
+            'bottomIdealRange': 20,
+            'bufferValue':10
+        },
+        'Return on Shareholders Equity': {
+            'topIdealRange':'',
+            'bottomIdealRange': 20,
+            'bufferValue':0
+        },
+        'Capital Expenditures %': {
+            'topIdealRange':25,
+            'bottomIdealRange': '',
+            'bufferValue':35
+        },
+        'Interest Expense %': {
+            'topIdealRange':15,
+            'bottomIdealRange': '',
+            'bufferValue':''
+        },
+        'Current Ratio' : {
+            'topIdealRange':'',
+            'bottomIdealRange': 1,
+            'bufferValue':0.2
+        },
+        'Return on Asset Ratio' : {
+            'topIdealRange':'',
+            'bottomIdealRange': 20,
+            'bufferValue':17
+        },
+        'Debt to Shareholders Equity Ratio' : {
+            'topIdealRange':100,
+            'bottomIdealRange': '',
+            'bufferValue':100
+        },
+        'Operating Margin' : {
+            'topIdealRange':'',
+            'bottomIdealRange': 15,
+            'bufferValue':13
+        },
+        'Gross Profit Margin' : {
+            'topIdealRange':'',
+            'bottomIdealRange': 40,
+            'bufferValue':20
         }
-    })
-    .catch(error => console.error('Error applying highlighting:', error));
+
+    };
+    if (year=='YoY(past year)'){
+        return ''
+    };
+    if (!(category in valueRange)){
+        return ''
+    };
+    var valueRangeC=valueRange[category];
+    var topIdealRange=valueRangeC['topIdealRange'];
+    var bottomIdealRange=valueRangeC['bottomIdealRange'];
+    var bufferValue=valueRangeC['bufferValue'];
+    if (typeof num =='') {
+        return '';
+    };
+    if (topIdealRange =='') {
+        if (num > bottomIdealRange) {
+            return 'green'
+        } else if (num < (bottomIdealRange-bufferValue)) {
+            return 'red'
+        } else {
+            return 'yellow'
+        }
+    } else if (bottomIdealRange =='') {
+        if (num < topIdealRange) {
+            return 'green'
+        } else if (num > (topIdealRange+bufferValue)) {
+            return 'red'
+        } else {
+            return 'yellow'
+        }
+    } else {
+        if (num < topIdealRange && num > bottomIdealRange){
+            return 'green'
+        } else if (num>topIdealRange+bufferValue || num<bottomIdealRange-bufferValue) {
+            return 'red'
+        } else {
+            return 'yellow'
+        }
+    };
 }

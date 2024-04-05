@@ -310,3 +310,14 @@ Equation: N/A
 Why is it important: Dividend Discount Model (DDM) is commonly used to value dividend-paying stocks. It calculates the present value of all expected future dividends to determine the stock's fair value.
 !
 
+Market Cap
+Definition: Market Capitalization, often referred to as Market Cap, is the total value of a company's outstanding shares of stock. It is calculated by multiplying the current market price of a single share by the total number of outstanding shares.
+Equation: Market Cap = Current Stock Price * Total Outstanding Shares
+Why is it important: Market Cap provides investors with a snapshot of a company's overall value as perceived by the stock market. It is a key metric used to categorize companies by size (such as large-cap, mid-cap, or small-cap) and is often considered in investment decisions and benchmarking against industry peers.
+!
+
+EBITDA
+Definition: Earnings Before Interest, Taxes, Depreciation, and Amortization (EBITDA) is a measure of a company's operating performance. It indicates the company's profitability before accounting for non-operating expenses and is often used as a proxy for cash flow from operations.
+Equation: EBITDA = Operating Income + Depreciation + Amortization
+Why is it important: EBITDA provides a clearer view of a company's operational efficiency and profitability by excluding non-operating expenses and the effects of financing and accounting decisions. It is commonly used in financial analysis, valuation, and comparing the performance of companies within the same industry.
+!
