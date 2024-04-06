@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", function() {
         var companyName = document.getElementById("company-title");
         output.innerHTML = "";
         compareButtonDiv.innerHTML = "";
+        var newLine = document.getElementById('new-line');
+        const lineBreak=document.createElement('br');
+        newLine.appendChild(lineBreak);
         var inputBox = document.createElement("input");
         inputBox.type = "text";
         inputBox.placeholder = "Enter tickers to compare:";
@@ -234,7 +237,7 @@ function compareFunction(data1,data,inputValue) {
     compareButtonDiv.innerHTML = "";
     companyName.innerHTML="";
     var divToDelete = document.getElementById("new-line");
-    divToDelete.parentNode.removeChild(divToDelete);
+    divToDelete.removeChild(divToDelete.firstChild);
     title='Income Statement'
     var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'EBITDA','Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     var IS1=data1["IS"]
