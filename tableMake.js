@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var input = document.getElementById("ticker").value;
         console.log("Ticker input value:", input);
         var data = {'ticker': input};
-        fetch('http://127.0.0.1:5000/main', {
+        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var outputDiv = document.getElementById("compare-button");
             var inputValue = outputDiv.querySelector("#compareInput").value;
             var data1=data
-            fetchData2(inputValue, data1); // Pass inputValue and data to fetchData2
+            Data2(inputValue, data1); // Pass inputValue and data to Data2
     });
         // Append the compare button to the output div
         compareButtonDiv.appendChild(compareButton);
@@ -217,7 +217,7 @@ function openBox(header) {
 function fetchData2(inputValue,data1){
     console.log("Ticker input value:", inputValue);
     var data = {'ticker': inputValue};
-    fetch('http://127.0.0.1:5000/main', {
+    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
