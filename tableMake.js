@@ -502,8 +502,3 @@ function getColorForValue(value,category,year) {
         }
     };
 }
-
-function createList(dict) {
-    
-    for ()
-}
