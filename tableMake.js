@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var input = document.getElementById("ticker").value;
         console.log("Ticker input value:", input);
         var data = {'ticker': input};
-        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        fetch('http://127.0.0.1:5000/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,11 +31,14 @@ document.addEventListener("DOMContentLoaded", function() {
         var output = document.getElementById("output");
         var compareButtonDiv = document.getElementById("compare-button");
         var companyName = document.getElementById("company-title");
+        var line = document.querySelector('#new-line');
+        if (line == null) {
+            var newLine = document.getElementById('new-line');
+            const lineBreak=document.createElement('br');
+            newLine.appendChild(lineBreak);
+        }
         output.innerHTML = "";
         compareButtonDiv.innerHTML = "";
-        var newLine = document.getElementById('new-line');
-        const lineBreak=document.createElement('br');
-        newLine.appendChild(lineBreak);
         var inputBox = document.createElement("input");
         inputBox.type = "text";
         inputBox.placeholder = "Enter tickers to compare:";
@@ -110,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var yearHeader = document.createElement('th');
         yearHeader.textContent = 'Year';
         yearHeader.style.border = "1px solid black";
+        yearHeader.style.backgroundColor = '#e5e5ec ';
         headerRow.appendChild(yearHeader);
 
         // Add other headers in the specified order
@@ -117,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var th = document.createElement('th');
             th.textContent = header;
             th.style.border = "1px solid black";
+            th.style.backgroundColor = '#e5e5ec ';
             headerRow.appendChild(th);
 
             th.addEventListener('click', function () {
@@ -134,6 +139,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var yearCell = document.createElement('td');
             yearCell.textContent = year;
             yearCell.style.border = "1px solid black";
+            yearCell.style.backgroundColor = '#e5e5ec ';
             row.appendChild(yearCell);
     
             categoryOrder.forEach(function (category, index) {
@@ -211,7 +217,7 @@ function openBox(header) {
 function fetchData2(inputValue,data1){
     console.log("Ticker input value:", inputValue);
     var data = {'ticker': inputValue};
-    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+    fetch('http://127.0.0.1:5000/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -236,8 +242,10 @@ function compareFunction(data1,data,inputValue) {
     output.innerHTML = "";
     compareButtonDiv.innerHTML = "";
     companyName.innerHTML="";
-    var divToDelete = document.getElementById("new-line");
-    divToDelete.removeChild(divToDelete.firstChild);
+    var line = document.querySelector('#new-line');
+    if (line == null) {
+        var divToDelete = document.getElementById("new-line");
+        divToDelete.removeChild(divToDelete.firstChild); }
     title='Income Statement'
     var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'EBITDA','Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     var IS1=data1["IS"]
@@ -294,6 +302,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
     var yearHeader = document.createElement('th');
     yearHeader.textContent = 'Year';
     yearHeader.style.border = "1px solid black";
+    yearHeader.style.backgroundColor = '#e5e5ec ';
     headerRow.appendChild(yearHeader);
 
     // Add other headers in the specified order
@@ -301,6 +310,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
         var th = document.createElement('th');
         th.textContent = header;
         th.style.border = "1px solid black";
+        th.style.backgroundColor = '#e5e5ec '
         headerRow.appendChild(th);
 
         th.addEventListener('click', function () {
@@ -316,6 +326,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
     var mainCompanyCell = document.createElement('td');
     mainCompanyCell.textContent = mainCompany;
     mainCompanyCell.style.border = "1px solid black";
+    mainCompanyCell.style.backgroundColor = '#e5e5ec ';
     mainCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
     mainCompanyRow.appendChild(mainCompanyCell);
     tbody.appendChild(mainCompanyRow);
@@ -326,6 +337,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
         var row = document.createElement('tr');
         var yearCell = document.createElement('td');
         yearCell.textContent = year;
+        yearCell.style.backgroundColor = '#e5e5ec ';
         yearCell.style.border = "1px solid black";
         row.appendChild(yearCell);
 
@@ -345,6 +357,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
     var otherCompanyRow = document.createElement('tr');
     var otherCompanyCell = document.createElement('td');
     otherCompanyCell.textContent = compareCompany;
+    otherCompanyCell.style.backgroundColor = '#e5e5ec ';
     otherCompanyCell.style.border = "1px solid black";
     otherCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
     otherCompanyRow.appendChild(otherCompanyCell);
@@ -358,6 +371,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
         var row = document.createElement('tr');
         var yearCell = document.createElement('td');
         yearCell.textContent = year;
+        yearCell.style.backgroundColor = '#e5e5ec ';
         yearCell.style.border = "1px solid black";
         row.appendChild(yearCell);
 
@@ -381,7 +395,7 @@ function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compa
 
 function getColorForValue(value,category,year) {
     if (typeof value !== 'number' && typeof value !== 'string') {
-        return ''
+        return '#e5e5ec '
     };
     if (typeof value !== 'number') {
         var num = parseFloat(value.replace(/[^0-9.-]/g, ''));
@@ -450,10 +464,10 @@ function getColorForValue(value,category,year) {
 
     };
     if (year=='YoY(past year)'){
-        return ''
+        return '#e5e5ec '
     };
     if (!(category in valueRange)){
-        return ''
+        return '#e5e5ec '
     };
     var valueRangeC=valueRange[category];
     var topIdealRange=valueRangeC['topIdealRange'];
@@ -487,4 +501,9 @@ function getColorForValue(value,category,year) {
             return 'yellow'
         }
     };
+}
+
+function createList(dict) {
+    
+    for ()
 }
