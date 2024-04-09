@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function() {
             var outputDiv = document.getElementById("compare-button");
             var inputValue = outputDiv.querySelector("#compareInput").value;
             var data1=data
-            Data2(inputValue, data1); // Pass inputValue and data to Data2
+            fetchData2(inputValue, data1); // Pass inputValue and data to Data2
     });
         // Append the compare button to the output div
         compareButtonDiv.appendChild(compareButton);
