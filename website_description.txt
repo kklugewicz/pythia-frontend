@@ -1,2 +1,2 @@
 Welcome to Pythia Asset Analysis.
-Here at Pythia, it is our goal to create tools that help investors to make educated financial decisions.
+A Tool to help Investors win.
