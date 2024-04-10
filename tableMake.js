@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var input = document.getElementById("ticker").value;
         console.log("Ticker input value:", input);
         var data = {'ticker': input};
-        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        fetch('http://127.0.0.1:5000/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -25,12 +25,15 @@ document.addEventListener("DOMContentLoaded", function() {
         fetchData();
     });
     
-
-    
     function main(data) {
         var output = document.getElementById("output");
         var compareButtonDiv = document.getElementById("compare-button");
         var companyName = document.getElementById("company-title");
+        var summaryDiv=document.getElementById('summary');
+        var summaryBox=document.getElementById('summaryBox')
+        if (summaryDiv.contains(summaryBox)) {
+            summaryDiv.removeChild(summaryBox);
+        }
         var line = document.querySelector('#new-line');
         if (line == null) {
             var newLine = document.getElementById('new-line');
@@ -38,6 +41,8 @@ document.addEventListener("DOMContentLoaded", function() {
             newLine.appendChild(lineBreak);
         }
         output.innerHTML = "";
+        var summaryBox=document.createElement('div');
+        summaryBox.id = 'summaryBox';
         compareButtonDiv.innerHTML = "";
         var inputBox = document.createElement("input");
         inputBox.type = "text";
@@ -53,115 +58,122 @@ document.addEventListener("DOMContentLoaded", function() {
             var outputDiv = document.getElementById("compare-button");
             var inputValue = outputDiv.querySelector("#compareInput").value;
             var data1=data
-            fetchData2(inputValue, data1); // Pass inputValue and data to Data2
+            fetchData2(inputValue, data1); // Pass inputValue and data to fetchData2
     });
         // Append the compare button to the output div
         compareButtonDiv.appendChild(compareButton);
+        var summary=data['Summary'];
+        summaryBox.innerHTML = summary;
+        summaryDiv.appendChild(summaryBox);
+        var data2 = {};
         var companyName=data["Company Name"]
         addTitle(companyName)
+        var basics=data['Basics']
+        var categoryOrder=['Industry','Market Cap', 'Current Stock Price']
+        createTable(basics,categoryOrder,'Basic Stock Info')
         title='Income Statement'
-        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'EBITDA','Basic EPS', 'Net Earnings to Total'];
         var IS=data["IS"]
+        var categoryOrder = createList(IS, data2, 'IS')
         createTable(IS,categoryOrder,title)
         title='Balance Sheet: Assets'
-        categoryOrder = ['Cash And Cash Equivalents','Inventory', 'Receivables','Current Assets','Current Ratio','Fixed Asset Turnover Ratio','Total Non Current Assets','Total Assets','Return on Asset Ratio'];
         var ABS=data["ABS"]
+        var categoryOrder = createList(ABS, data2, 'ABS')
         createTable(ABS,categoryOrder,title)
         title='Balance Sheet: Liabilities'
-        categoryOrder = ['Payables And Accrued Expenses','Current Debt', 'Long Term Debt','Current Liabilities','Total Non Current Liabilities Net Minority Interest','Total Liabilities Net Minority Interest','Net Debt','Total Debt','Debt to Shareholders Equity Ratio'];
         var LBS=data["LBS"]
+        var categoryOrder = createList(LBS, data2, 'LBS')
         createTable(LBS,categoryOrder,title)
         title='Balance Sheet: Treasuries'
-        categoryOrder = ['Common Stock','Retained Earnings','Stockholders Equity','Return on Shareholders Equity'];
         var TBS=data["TBS"]
+        var categoryOrder = createList(TBS, data2, 'TBS')
         createTable(TBS,categoryOrder,title)
         title='Cashflow Statement'
-        categoryOrder = ['Free Cash Flow','Net Income','Net Income From Continuing Operations','Capital Expenditures %', 'Net Common Stock Issuance'];
         var CF=data["CF"]
+        var categoryOrder = createList(CF, data2, 'CF')
         createTable(CF,categoryOrder,title)
         title='Valuation Models'
-        categoryOrder = ['Current Stock Price', 'Market Cap','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
         var Valuations=data["Valuations"]
+        var categoryOrder = createList(Valuations, data2, 'Valuations')
         createTable(Valuations,categoryOrder,title)
     }
 
-    function addTitle(title) {
-        document.getElementById("company-title").innerHTML=title
-    }
-
-    function createTable(data,categoryOrder,title) {
-        var tableContainer = document.getElementById("output");
-        //Create variables for table elements
-        var table = document.createElement('table');
-        var thead = document.createElement('thead');
-        var tbody = document.createElement('tbody');
-
-        //Edit Style
-        table.style.borderCollapse = "collapse"; 
-        table.style.width = '70%';
-        table.style.marginLeft = 'auto';
-        table.style.marginRight = 'auto';
-        //Create caption
-        var caption = table.createCaption();
-        caption.textContent = title;
-        caption.classList.add('table-caption');
-
-        // Create table header
-        var headerRow = document.createElement('tr');
-
-        // Add 'Year' as the first header
-        var yearHeader = document.createElement('th');
-        yearHeader.textContent = 'Year';
-        yearHeader.style.border = "1px solid black";
-        yearHeader.style.backgroundColor = '#e5e5ec ';
-        headerRow.appendChild(yearHeader);
-
-        // Add other headers in the specified order
-        categoryOrder.forEach(function(header) {
-            var th = document.createElement('th');
-            th.textContent = header;
-            th.style.border = "1px solid black";
-            th.style.backgroundColor = '#e5e5ec ';
-            headerRow.appendChild(th);
-
-            th.addEventListener('click', function () {
-                openBox(header);
-            });
-        });
-
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        // Create table body
-        Object.keys(data).forEach(function (year) {
-            var yearData = data[year];
-            var row = document.createElement('tr');
-            var yearCell = document.createElement('td');
-            yearCell.textContent = year;
-            yearCell.style.border = "1px solid black";
-            yearCell.style.backgroundColor = '#e5e5ec ';
-            row.appendChild(yearCell);
-    
-            categoryOrder.forEach(function (category, index) {
-                var cell = document.createElement('td');
-                var value = yearData[category];
-    
-                cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
-                cell.style.border = "1px solid black";
-                cell.style.backgroundColor = getColorForValue(value,category,year);
-                row.appendChild(cell);
-            });
-
-            tbody.appendChild(row);
-        });
-
-        table.appendChild(tbody);
-
-        // Append table to document body
-        tableContainer.appendChild(table);
-    }
-
 });
+
+function addTitle(title) {
+    document.getElementById("company-title").innerHTML=title
+}
+
+function createTable(data,categoryOrder,title) {
+    var tableContainer = document.getElementById("output");
+    //Create variables for table elements
+    var table = document.createElement('table');
+    var thead = document.createElement('thead');
+    var tbody = document.createElement('tbody');
+
+    //Edit Style
+    table.style.borderCollapse = "collapse"; 
+    table.style.width = '70%';
+    table.style.marginLeft = 'auto';
+    table.style.marginRight = 'auto';
+    //Create caption
+    var caption = table.createCaption();
+    caption.textContent = title;
+    caption.classList.add('table-caption');
+
+    // Create table header
+    var headerRow = document.createElement('tr');
+
+    // Add 'Year' as the first header
+    var yearHeader = document.createElement('th');
+    yearHeader.textContent = 'Year';
+    yearHeader.style.border = "1px solid black";
+    yearHeader.style.backgroundColor = '#e5e5ec ';
+    headerRow.appendChild(yearHeader);
+
+    // Add other headers in the specified order
+    categoryOrder.forEach(function(header) {
+        var th = document.createElement('th');
+        th.textContent = header;
+        th.style.border = "1px solid black";
+        th.style.backgroundColor = '#e5e5ec ';
+        headerRow.appendChild(th);
+
+        th.addEventListener('click', function () {
+            openBox(header);
+        });
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    Object.keys(data).forEach(function (year) {
+        var yearData = data[year];
+        var row = document.createElement('tr');
+        var yearCell = document.createElement('td');
+        yearCell.textContent = year;
+        yearCell.style.border = "1px solid black";
+        yearCell.style.backgroundColor = '#e5e5ec ';
+        row.appendChild(yearCell);
+
+        categoryOrder.forEach(function (category, index) {
+            var cell = document.createElement('td');
+            var value = yearData[category];
+
+            cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
+            cell.style.border = "1px solid black";
+            cell.style.backgroundColor = getColorForValue(value,category,year);
+            row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    // Append table to document body
+    tableContainer.appendChild(table);
+}
 
 function formatNumber(number) {
     if (Math.abs(number) >= 1.0e+9) {
@@ -217,7 +229,7 @@ function openBox(header) {
 function fetchData2(inputValue,data1){
     console.log("Ticker input value:", inputValue);
     var data = {'ticker': inputValue};
-    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+    fetch('http://127.0.0.1:5000/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -237,6 +249,9 @@ function compareFunction(data1,data,inputValue) {
     var output = document.getElementById("output");
     var compareButtonDiv = document.getElementById("compare-button");
     var companyName = document.getElementById("company-title");
+    var summary = document.getElementById('summary')
+    var summaryBox=document.getElementById('summaryBox')
+    summary.removeChild(summaryBox)
     var mainCompany = data1["Company Name"];
     var compareCompany = data["Company Name"]
     output.innerHTML = "";
@@ -246,35 +261,39 @@ function compareFunction(data1,data,inputValue) {
     if (line == null) {
         var divToDelete = document.getElementById("new-line");
         divToDelete.removeChild(divToDelete.firstChild); }
+    var basics1=data1['Basics']
+    var basics2=data['Basics']
+    var categoryOrder=['Industry','Market Cap', 'Current Stock Price']
+    createCompareTable(basics1,basics2,categoryOrder,'Basic Stock Info',mainCompany,compareCompany)
     title='Income Statement'
-    var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'EBITDA','Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     var IS1=data1["IS"]
     var IS2=data["IS"]
+    var categoryOrder = createList(IS1, IS2, 'IS')
     createCompareTable(IS1,IS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Assets'
-    categoryOrder = ['Cash And Cash Equivalents','Inventory', 'Receivables','Current Assets','Current Ratio','Fixed Asset Turnover Ratio','Total Non Current Assets','Total Assets','Return on Asset Ratio'];
     var ABS1=data1["ABS"]
     var ABS2=data["ABS"]
+    var categoryOrder = createList(ABS1, ABS2, 'ABS')
     createCompareTable(ABS1,ABS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Liabilities'
-    categoryOrder = ['Payables And Accrued Expenses','Current Debt', 'Long Term Debt','Current Liabilities','Total Non Current Liabilities Net Minority Interest','Total Liabilities Net Minority Interest','Net Debt','Total Debt','Debt to Shareholders Equity Ratio'];
     var LBS1=data1["LBS"]
     var LBS2=data["LBS"]
+    var categoryOrder = createList(LBS1, LBS2, 'LBS')
     createCompareTable(LBS1,LBS2,categoryOrder,title,mainCompany,compareCompany)
     title='Balance Sheet: Treasuries'
-    categoryOrder = ['Common Stock','Retained Earnings','Stockholders Equity','Return on Shareholders Equity'];
     var TBS1=data1["TBS"]
     var TBS2=data["TBS"]
+    var categoryOrder = createList(TBS1, TBS2, 'TBS')
     createCompareTable(TBS1,TBS2,categoryOrder,title,mainCompany,compareCompany)
     title='Cashflow Statement'
-    categoryOrder = ['Free Cash Flow','Net Income','Net Income From Continuing Operations','Capital Expenditures %', 'Net Common Stock Issuance'];
     var CF1=data1["CF"]
     var CF2=data["CF"]
+    var categoryOrder = createList(CF1, CF2, 'CF')
     createCompareTable(CF1,CF2,categoryOrder,title,mainCompany,compareCompany)
     title='Valuation Models'
-    categoryOrder = ['Current Stock Price', 'Market Cap','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
     var Valuations1=data1["Valuations"]
     var Valuations2=data["Valuations"]
+    var categoryOrder = createList(Valuations1, Valuations2, 'Valuations')
     createCompareTable(Valuations1,Valuations2,categoryOrder,title,mainCompany,compareCompany)
 }
 
@@ -503,3 +522,48 @@ function getColorForValue(value,category,year) {
     };
 }
 
+function createList(data,data2,type) {
+    console.log(data)
+    if (type=='Valuations') {
+        data=data['current']
+        if ('current' in data2) {
+            data2 =data2['current']
+        }
+        else {
+            data2={}
+        }
+    }
+    else {
+        var data =data['YoY(past year)']
+        
+        if ('YoY(past year)' in data2) {
+            data2 =data2['YoY(past year)']
+        }
+        else {
+            data2={}
+    }
+    }
+    if (type=='IS') {
+        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'EBITDA','Basic EPS', 'Net Earnings to Total'];
+    } if (type=='ABS') {
+        var categoryOrder = ['Cash And Cash Equivalents','Inventory', 'Receivables','Current Assets','Current Ratio','Fixed Asset Turnover Ratio','Total Non Current Assets','Total Assets','Return on Asset Ratio'];
+    } if (type=='LBS') {
+        var categoryOrder = ['Payables And Accrued Expenses','Current Debt', 'Long Term Debt','Current Liabilities','Total Non Current Liabilities Net Minority Interest','Total Liabilities Net Minority Interest','Net Debt','Total Debt','Debt to Shareholders Equity Ratio'];
+    } if (type=='TBS') {
+        var categoryOrder = ['Common Stock','Retained Earnings','Stockholders Equity','Return on Shareholders Equity'];
+    } if (type=='CF') {
+        var categoryOrder = ['Free Cash Flow','Net Income','Net Income From Continuing Operations','Capital Expenditures %', 'Net Common Stock Issuance'];
+    } if (type=='Valuations') {
+        var categoryOrder = ['Current Stock Price', 'Market Cap','Trailing P/E','Forward P/E','Trailing PEG Ratio','P/FCF','Discounted Cash Flow Model','Peter Lynchs Valuation','Benjamin Grahams Valuation','Multiples Valuation','Dividend Discount Model'];
+    } 
+    var dataCat1=Object.keys(data);
+    var dataCat2 = Object.keys(data2);
+    
+    var endList=[];
+    for (let element of categoryOrder) {
+        if (dataCat1.includes(element) || dataCat2.includes(element)) {
+            endList.push(element);
+        }
+    }
+    return endList;
+}
