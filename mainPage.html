@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYTHIA ASSET ANALYSIS</title>
+<style>
+    body {
+        font-family: 'Times New Roman', Times, serif, sans-serif;
+        text-align: center;
+        background-color: rgb(216, 211, 186); 
+        margin: 0; 
+        padding: 0; 
+        display: flex; 
+        flex-direction: column; 
+        min-height: 100vh; 
+    }
+    #title {
+        font-size: 24px;
+        margin-top: 20px;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    #website-description {
+        font-size: 16px;
+        margin-top: auto;
+        text-align: center; 
+        margin-bottom: 20px;
+    }
+    #tickerInput {
+        margin-top: 20px;
+        padding: 5px;
+        font-size: 16px;
+        width: 145px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #image {
+        margin-top: 70px;
+        margin-right: auto;
+        margin-left: auto;
+        width: 140px;
+    }
+    footer {
+        margin-top: auto; 
+        background-color: #333; 
+        color: #fff; 
+        padding: 20px; 
+    }
+    .output {
+        justify-content: center;
+        margin: auto;
+        overflow-x: auto; /* Enable horizontal scrolling */
+        max-width: 100%;
+    }
+    .table {
+        justify-content: center;
+        text-align: center;
+        margin: auto;
+        overflow-x: auto; /* Enable horizontal scrolling */
+        width:auto
+    }
+    .table-caption {
+        font-size: 30px;
+        font-weight: bold;
+        }
+    #company-title {
+        margin-right: auto;
+        margin-left: auto;
+        font-size: 30px;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+    #summaryBox {
+        width: auto;
+        border: 1px solid #000000; /* Border style */
+        padding: 20px; /* Padding inside the box */
+        margin: 10px auto; /* Margin around the box */
+        background-color: #e5e5ec;
+    }
+    .base-container {
+    display: flex; /* Use flexbox layout */
+    }
+
+    .content {
+    flex: 1; /* Take up remaining space */
+    margin-top: 50px;
+    margin-bottom: 50px;
+    max-width:1000px;
+    }
+
+    .sidebar {
+    width: 500px; /* Adjust width as needed */
+    /* Add styles for the sidebar */
+    }
+    .table-separator {
+    margin-bottom: 20px; /* Adjust the margin to your desired spacing */
+    }
+    table {
+        width: 100%; /* Make the table take up 100% of the container's width */
+        border-collapse: collapse; /* Collapse borders for better appearance */
+        position: relative;
+    }
+    th, td {
+        border: 1px solid #ccc; /* Add borders for visualization */
+        padding: 8px; /* Add padding for spacing */
+    }
+    th:first-child,
+    td:first-child {
+        position: sticky; /* Make the first column sticky */
+        left: 0; /* Stick to the left edge of the container */
+        background-color: #f2f2f2; /* Add background color for better visibility */
+        z-index: 1; /* Ensure it stays above other cells */
+    }
+    @media only screen and (max-width: 600px) {
+    .content {
+      max-width: 70%;
+    }
+    .sidebar {
+    width: 30%; /* Adjust width as needed */
+    /* Add styles for the sidebar */
+    }
+    #summaryBox {
+    width: 80%;
+    font-size: 11px;
+    }
+    .output {
+        justify-content: center;
+        overflow-x: auto; /* Enable horizontal scrolling */
+        max-width: 85%;
+    }
+    .table-caption {
+        position: sticky; /* Make the first column sticky */
+        top: 0; /* Stick to the left edge of the container */
+        left:0;
+        font-size: 20px;
+        font-weight: bold;
+        }
+  }
+</style>
+</head>
+<body>
+    <div class="base-container">
+        <div class="sidebar">
+            <img id="image" src="logo.png">
+            <div id="title">Pythia Asset Analysis</div>
+            <form id="tickerForm">
+            <input type="text" id="ticker" placeholder="Enter ticker symbol">
+            <button type="submit"> Generate </button>
+            </form>    
+            <div id="compare-button"></div>
+        </div>
+        <div class="content">
+            <div id="company-title"></div>
+            <div id="summary"></div>
+            <div id="output-container"></div>
+        </div>
+    </div>
+    <div id="website_description"> </div>
+    <script src="website-description.js"></script>
+    <script src="tableMake.js"> </script>
+    <footer>
+        &copy; 2024 Pythia Asset Analysis. All rights reserved.
+    </footer>
+</body>
+</html>

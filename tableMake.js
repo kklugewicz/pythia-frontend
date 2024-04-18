@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var input = document.getElementById("ticker").value;
         console.log("Ticker input value:", input);
         var data = {'ticker': input};
+        var compareData = 'n/a'
         fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
             method: 'POST',
             headers: {
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             // Process the received data
             console.log("Received data:",data);
-            main(data); // Pass the received data to createISTable function
+            main(data,compareData); // Pass the received data to createISTable function
         })
         .catch(error => console.error('Error:', error));
     }
@@ -24,87 +25,120 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         fetchData();
     });
+});
+
+function main(mainData,compareData) {
+    var compareButtonDiv = document.getElementById("compare-button");
+    var companyName = document.getElementById("company-title");
+    var summaryDiv=document.getElementById('summary');
+    var summaryBox=document.getElementById('summaryBox')
+    var massContainer = document.getElementById("output-container");
+    while (massContainer.firstChild) {
+        massContainer.removeChild(massContainer.firstChild);
+    }
+    massContainer.innerHTML='';
+    summaryDiv.innerHTML='';
+    companyName.innerHTML='';
+
     
-    function main(data) {
-        var output = document.getElementById("output");
-        var compareButtonDiv = document.getElementById("compare-button");
-        var companyName = document.getElementById("company-title");
-        var summaryDiv=document.getElementById('summary');
-        var summaryBox=document.getElementById('summaryBox')
+    compareButtonDiv.innerHTML = "";
+    var inputBox = document.createElement("input");
+    inputBox.type = "text";
+    inputBox.placeholder = "Enter tickers to compare:";
+    inputBox.id = "compareInput"; // Assign an ID to the input box
+    compareButtonDiv.appendChild(inputBox);
+    
+    var compareButton = document.createElement("button");
+    compareButton.innerHTML = "Compare";
+    
+    compareButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        var outputDiv = document.getElementById("compare-button");
+        var inputValue = outputDiv.querySelector("#compareInput").value;
+        fetchDataCompare(inputValue, mainData); // Pass inputValue and data to fetchData2
+});
+    // Append the compare button to the output div
+    compareButtonDiv.appendChild(compareButton);
+
+    //extract data
+    var mainBasics=mainData['Basics'];
+    var mainSummary=mainData['Summary'];
+    var mainIS=mainData["IS"];
+    var mainABS=mainData["ABS"];
+    var mainLBS=mainData["LBS"];
+    var mainTBS=mainData["TBS"];
+    var mainCF=mainData["CF"];
+    var mainValuations=mainData["Valuations"];
+    if (compareData!='n/a') {
+        var compareBasics=compareData['Basics']
+        var compareIS=compareData["IS"]
+        var compareABS=compareData["ABS"]
+        var compareLBS=compareData["LBS"]
+        var compareTBS=compareData["TBS"]
+        var compareCF=compareData["CF"]
+        var compareValuations=compareData["Valuations"]
+        var compareSummary=compareData['summary']
+    } else {
+        var compareBasics='n/a'
+        var compareIS='n/a'
+        var compareABS='n/a'
+        var compareLBS='n/a'
+        var compareTBS='n/a'
+        var compareCF='n/a'
+        var compareValuations='n/a'
+        var compareSummary='n/a'
+    };
+
+    //Add Summary
+    if (compareSummary=='n/a') {
         if (summaryDiv.contains(summaryBox)) {
             summaryDiv.removeChild(summaryBox);
         }
-        var line = document.querySelector('#new-line');
-        if (line == null) {
-            var newLine = document.getElementById('new-line');
-            const lineBreak=document.createElement('br');
-            newLine.appendChild(lineBreak);
-        }
-        output.innerHTML = "";
         var summaryBox=document.createElement('div');
         summaryBox.id = 'summaryBox';
-        compareButtonDiv.innerHTML = "";
-        var inputBox = document.createElement("input");
-        inputBox.type = "text";
-        inputBox.placeholder = "Enter tickers to compare:";
-        inputBox.id = "compareInput"; // Assign an ID to the input box
-        compareButtonDiv.appendChild(inputBox);
         
-        var compareButton = document.createElement("button");
-        compareButton.innerHTML = "Compare";
-        
-        compareButton.addEventListener("click", function(event) {
-            event.preventDefault();
-            var outputDiv = document.getElementById("compare-button");
-            var inputValue = outputDiv.querySelector("#compareInput").value;
-            var data1=data
-            fetchData2(inputValue, data1); // Pass inputValue and data to fetchData2
-    });
-        // Append the compare button to the output div
-        compareButtonDiv.appendChild(compareButton);
-        var summary=data['Summary'];
-        summaryBox.innerHTML = summary;
+        summaryBox.innerHTML = mainSummary;
         summaryDiv.appendChild(summaryBox);
-        var data2 = {};
-        var companyName=data["Company Name"]
-        addTitle(companyName)
-        var basics=data['Basics']
-        var categoryOrder=['Industry','Market Cap', 'Current Stock Price']
-        createTable(basics,categoryOrder,'Basic Stock Info')
-        title='Income Statement'
-        var IS=data["IS"]
-        var categoryOrder = createList(IS, data2, 'IS')
-        createTable(IS,categoryOrder,title)
-        title='Balance Sheet: Assets'
-        var ABS=data["ABS"]
-        var categoryOrder = createList(ABS, data2, 'ABS')
-        createTable(ABS,categoryOrder,title)
-        title='Balance Sheet: Liabilities'
-        var LBS=data["LBS"]
-        var categoryOrder = createList(LBS, data2, 'LBS')
-        createTable(LBS,categoryOrder,title)
-        title='Balance Sheet: Treasuries'
-        var TBS=data["TBS"]
-        var categoryOrder = createList(TBS, data2, 'TBS')
-        createTable(TBS,categoryOrder,title)
-        title='Cashflow Statement'
-        var CF=data["CF"]
-        var categoryOrder = createList(CF, data2, 'CF')
-        createTable(CF,categoryOrder,title)
-        title='Valuation Models'
-        var Valuations=data["Valuations"]
-        var categoryOrder = createList(Valuations, data2, 'Valuations')
-        createTable(Valuations,categoryOrder,title)
     }
 
-});
+    //set company name and place title
+    var mainCompanyName=mainData["Company Name"]
+    if (compareData!='n/a') {
+        var compareCompanyName=compareData['Company Name']
+    } else {
+        var compareCompanyName='n/a'
+    };
+    if (compareCompanyName=='n/a') {
+        document.getElementById("company-title").innerHTML=mainCompanyName
+    } else {
+        document.getElementById("company-title").innerHTML=''
+    };
 
-function addTitle(title) {
-    document.getElementById("company-title").innerHTML=title
+    //create category order lists
+    var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
+    var IScategoryOrder=createList(mainIS, compareIS, 'IS');
+    var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
+    var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
+    var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
+    var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
+    var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
+    
+    //create tables
+    createTable(mainBasics,compareBasics, basicsCategoryOrder,'Basic Stock Info', mainCompanyName, compareCompanyName);
+    createTable(mainIS,compareIS,IScategoryOrder,'Income Statement', mainCompanyName, compareCompanyName);
+    createTable(mainABS,compareABS,ABScategoryOrder,'Balance Sheet: Assets', mainCompanyName, compareCompanyName);
+    createTable(mainLBS,compareLBS,LBScategoryOrder,'Balance Sheet: Liabilities', mainCompanyName, compareCompanyName);
+    createTable(mainTBS,compareTBS,TBScategoryOrder,'Balance Sheet: Treasuries', mainCompanyName, compareCompanyName);
+    createTable(mainCF,compareCF,CFcategoryOrder,'Cash Flow Statement', mainCompanyName, compareCompanyName);
+    createTable(mainValuations,compareValuations,valuationsCategoryOrder,'Valuation Models', mainCompanyName, compareCompanyName);
 }
 
-function createTable(data,categoryOrder,title) {
-    var tableContainer = document.getElementById("output");
+function createTable(data,compareData,categoryOrder,title,mainCompanyName,compareCompanyName) {
+    var tableContainer=document.createElement("div")
+    tableContainer.classList.add('output');
+    var contentContainer=document.querySelector(".content");
+    var massContainer=document.getElementById('output-container');
+
     //Create variables for table elements
     var table = document.createElement('table');
     var thead = document.createElement('thead');
@@ -112,13 +146,14 @@ function createTable(data,categoryOrder,title) {
 
     //Edit Style
     table.style.borderCollapse = "collapse"; 
-    table.style.width = '70%';
     table.style.marginLeft = 'auto';
     table.style.marginRight = 'auto';
+
     //Create caption
-    var caption = table.createCaption();
-    caption.textContent = title;
+    var caption=document.createElement('div')
+    caption.innerHTML = title;
     caption.classList.add('table-caption');
+    massContainer.appendChild(caption);
 
     // Create table header
     var headerRow = document.createElement('tr');
@@ -146,6 +181,18 @@ function createTable(data,categoryOrder,title) {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
+    // Create row for "main company"
+    if (compareCompanyName!='n/a') {
+        var mainCompanyRow = document.createElement('tr');
+        var mainCompanyCell = document.createElement('td');
+        mainCompanyCell.textContent = mainCompanyName;
+        mainCompanyCell.style.border = "1px solid black";
+        mainCompanyCell.style.backgroundColor = '#e5e5ec ';
+        mainCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
+        mainCompanyRow.appendChild(mainCompanyCell);
+        tbody.appendChild(mainCompanyRow);
+    };
+
     // Create table body
     Object.keys(data).forEach(function (year) {
         var yearData = data[year];
@@ -171,8 +218,53 @@ function createTable(data,categoryOrder,title) {
 
     table.appendChild(tbody);
 
+    // Create row for "other company"
+    if (compareCompanyName!='n/a') {
+        var otherCompanyRow = document.createElement('tr');
+        var otherCompanyCell = document.createElement('td');
+        otherCompanyCell.textContent = compareCompanyName;
+        otherCompanyCell.style.backgroundColor = '#e5e5ec ';
+        otherCompanyCell.style.border = "1px solid black";
+        otherCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
+        otherCompanyRow.appendChild(otherCompanyCell);
+        tbody.appendChild(otherCompanyRow);
+    };
+
+    //Create table body for comparison
+    if (compareCompanyName!='n/a') {
+        var data2Keys = Object.keys(compareData);
+        var startIdx = Math.max(data2Keys.length - 2, 0); // Start from the last two years or 0 if less than two years
+        data2Keys.slice(startIdx).forEach(function (year) {
+            var yearData = compareData[year];
+            var row = document.createElement('tr');
+            var yearCell = document.createElement('td');
+            yearCell.textContent = year;
+            yearCell.style.backgroundColor = '#e5e5ec ';
+            yearCell.style.border = "1px solid black";
+            row.appendChild(yearCell);
+    
+            categoryOrder.forEach(function (category, index) {
+                var cell = document.createElement('td');
+                var value = yearData[category];
+                cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
+                cell.style.border = "1px solid black";
+                cell.style.backgroundColor = getColorForValue(value,category,year);
+                row.appendChild(cell);
+            });
+    
+            tbody.appendChild(row);
+        });
+    
+        table.appendChild(tbody);
+    }
+
     // Append table to document body
+    table.classList.add('.table');
     tableContainer.appendChild(table);
+    massContainer.appendChild(tableContainer);
+    var lineBreak = document.createElement('div');
+    lineBreak.classList.add('table-separator');
+    tableContainer.appendChild(lineBreak);
 }
 
 function formatNumber(number) {
@@ -186,6 +278,25 @@ function formatNumber(number) {
         return number.toFixed(2);
     }
 }    
+
+function fetchDataCompare(inputValue, mainData){
+    console.log("Ticker input value:", inputValue);
+    var data = {'ticker': inputValue};
+    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Process the received data
+        console.log("Received data:",data);
+        main(mainData,data); // Pass the received data to createISTable function
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 function openBox(header) {
     fetch('category_definitions.txt') // Fetch the generic text file
@@ -226,191 +337,6 @@ function openBox(header) {
     .catch(error => console.error('Error fetching file:', error));
 }
 
-function fetchData2(inputValue,data1){
-    console.log("Ticker input value:", inputValue);
-    var data = {'ticker': inputValue};
-    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Process the received data
-        console.log("Received data:",data);
-        compareFunction(data1,data,inputValue); // Pass the received data to createISTable function
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function compareFunction(data1,data,inputValue) {
-    var output = document.getElementById("output");
-    var compareButtonDiv = document.getElementById("compare-button");
-    var companyName = document.getElementById("company-title");
-    var summary = document.getElementById('summary')
-    var summaryBox=document.getElementById('summaryBox')
-    summary.removeChild(summaryBox)
-    var mainCompany = data1["Company Name"];
-    var compareCompany = data["Company Name"]
-    output.innerHTML = "";
-    compareButtonDiv.innerHTML = "";
-    companyName.innerHTML="";
-    var line = document.querySelector('#new-line');
-    if (line == null) {
-        var divToDelete = document.getElementById("new-line");
-        divToDelete.removeChild(divToDelete.firstChild); }
-    var basics1=data1['Basics']
-    var basics2=data['Basics']
-    var categoryOrder=['Industry','Market Cap', 'Current Stock Price']
-    createCompareTable(basics1,basics2,categoryOrder,'Basic Stock Info',mainCompany,compareCompany)
-    title='Income Statement'
-    var IS1=data1["IS"]
-    var IS2=data["IS"]
-    var categoryOrder = createList(IS1, IS2, 'IS')
-    createCompareTable(IS1,IS2,categoryOrder,title,mainCompany,compareCompany)
-    title='Balance Sheet: Assets'
-    var ABS1=data1["ABS"]
-    var ABS2=data["ABS"]
-    var categoryOrder = createList(ABS1, ABS2, 'ABS')
-    createCompareTable(ABS1,ABS2,categoryOrder,title,mainCompany,compareCompany)
-    title='Balance Sheet: Liabilities'
-    var LBS1=data1["LBS"]
-    var LBS2=data["LBS"]
-    var categoryOrder = createList(LBS1, LBS2, 'LBS')
-    createCompareTable(LBS1,LBS2,categoryOrder,title,mainCompany,compareCompany)
-    title='Balance Sheet: Treasuries'
-    var TBS1=data1["TBS"]
-    var TBS2=data["TBS"]
-    var categoryOrder = createList(TBS1, TBS2, 'TBS')
-    createCompareTable(TBS1,TBS2,categoryOrder,title,mainCompany,compareCompany)
-    title='Cashflow Statement'
-    var CF1=data1["CF"]
-    var CF2=data["CF"]
-    var categoryOrder = createList(CF1, CF2, 'CF')
-    createCompareTable(CF1,CF2,categoryOrder,title,mainCompany,compareCompany)
-    title='Valuation Models'
-    var Valuations1=data1["Valuations"]
-    var Valuations2=data["Valuations"]
-    var categoryOrder = createList(Valuations1, Valuations2, 'Valuations')
-    createCompareTable(Valuations1,Valuations2,categoryOrder,title,mainCompany,compareCompany)
-}
-
-function createCompareTable(data1, data2, categoryOrder, title,mainCompany,compareCompany) {
-    var tableContainer = document.getElementById("output");
-    //Create variables for table elements
-    var table = document.createElement('table');
-    var thead = document.createElement('thead');
-    var tbody = document.createElement('tbody');
-
-    //Edit Style
-    table.style.borderCollapse = "collapse"; 
-    table.style.width = '70%';
-    table.style.marginLeft = 'auto';
-    table.style.marginRight = 'auto';
-    //Create caption
-    var caption = table.createCaption();
-    caption.textContent = title;
-    caption.classList.add('table-caption');
-
-    // Create table header
-    var headerRow = document.createElement('tr');
-
-    // Add 'Year' as the first header
-    var yearHeader = document.createElement('th');
-    yearHeader.textContent = 'Year';
-    yearHeader.style.border = "1px solid black";
-    yearHeader.style.backgroundColor = '#e5e5ec ';
-    headerRow.appendChild(yearHeader);
-
-    // Add other headers in the specified order
-    categoryOrder.forEach(function(header) {
-        var th = document.createElement('th');
-        th.textContent = header;
-        th.style.border = "1px solid black";
-        th.style.backgroundColor = '#e5e5ec '
-        headerRow.appendChild(th);
-
-        th.addEventListener('click', function () {
-            openBox(header);
-        });
-    });
-
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-    
-    // Create row for "main company"
-    var mainCompanyRow = document.createElement('tr');
-    var mainCompanyCell = document.createElement('td');
-    mainCompanyCell.textContent = mainCompany;
-    mainCompanyCell.style.border = "1px solid black";
-    mainCompanyCell.style.backgroundColor = '#e5e5ec ';
-    mainCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
-    mainCompanyRow.appendChild(mainCompanyCell);
-    tbody.appendChild(mainCompanyRow);
-    
-    // Create table body for data1
-    Object.keys(data1).forEach(function (year) {
-        var yearData = data1[year];
-        var row = document.createElement('tr');
-        var yearCell = document.createElement('td');
-        yearCell.textContent = year;
-        yearCell.style.backgroundColor = '#e5e5ec ';
-        yearCell.style.border = "1px solid black";
-        row.appendChild(yearCell);
-
-        categoryOrder.forEach(function (category, index) {
-            var cell = document.createElement('td');
-            var value = yearData[category];
-            cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
-            cell.style.border = "1px solid black";
-            cell.style.backgroundColor = getColorForValue(value,category,year);
-            row.appendChild(cell);
-        });
-
-        tbody.appendChild(row);
-    });
-
-    // Create row for "Other company"
-    var otherCompanyRow = document.createElement('tr');
-    var otherCompanyCell = document.createElement('td');
-    otherCompanyCell.textContent = compareCompany;
-    otherCompanyCell.style.backgroundColor = '#e5e5ec ';
-    otherCompanyCell.style.border = "1px solid black";
-    otherCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
-    otherCompanyRow.appendChild(otherCompanyCell);
-    tbody.appendChild(otherCompanyRow);
-
-    // Create table body for last two years of data2
-    var data2Keys = Object.keys(data2);
-    var startIdx = Math.max(data2Keys.length - 2, 0); // Start from the last two years or 0 if less than two years
-    data2Keys.slice(startIdx).forEach(function (year) {
-        var yearData = data2[year];
-        var row = document.createElement('tr');
-        var yearCell = document.createElement('td');
-        yearCell.textContent = year;
-        yearCell.style.backgroundColor = '#e5e5ec ';
-        yearCell.style.border = "1px solid black";
-        row.appendChild(yearCell);
-
-        categoryOrder.forEach(function (category, index) {
-            var cell = document.createElement('td');
-            var value = yearData[category];
-            cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
-            cell.style.border = "1px solid black";
-            cell.style.backgroundColor = getColorForValue(value,category,year);
-            row.appendChild(cell);
-        });
-
-        tbody.appendChild(row);
-    });
-
-    table.appendChild(tbody);
-
-    // Append table to document body
-    tableContainer.appendChild(table);
-}
 
 function getColorForValue(value,category,year) {
     if (typeof value !== 'number' && typeof value !== 'string') {
@@ -522,22 +448,21 @@ function getColorForValue(value,category,year) {
     };
 }
 
-function createList(data,data2,type) {
-    console.log(data)
+function createList(mainData,compareData,type) {
     if (type=='Valuations') {
-        data=data['current']
-        if ('current' in data2) {
-            data2 =data2['current']
+        data=mainData['current']
+        if (compareData!='n/a') {
+            data2 =compareData['current']
         }
         else {
             data2={}
         }
     }
     else {
-        var data =data['YoY(past year)']
+        var data=mainData['YoY(past year)']
         
-        if ('YoY(past year)' in data2) {
-            data2 =data2['YoY(past year)']
+        if (compareData!='n/a') {
+            data2 =compareData['YoY(past year)']
         }
         else {
             data2={}
