@@ -116,12 +116,15 @@
         z-index: 1; /* Ensure it stays above other cells */
     }
     @media only screen and (max-width: 600px) {
-    .content {
-      max-width: 70%;
+    .base-container {
+        flex-direction: column;
     }
-    .sidebar {
-    width: 30%; /* Adjust width as needed */
-    /* Add styles for the sidebar */
+    
+    .content, .sidebar {
+        width: 100%; /* Take up the full width */
+    }
+    #image2 {
+        width:0px;
     }
     #summaryBox {
     width: 80%;
