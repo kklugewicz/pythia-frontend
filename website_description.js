@@ -15,7 +15,7 @@ fetch('website_description.txt')
     data = data.replace(/(<b>)(.*?)(<\/b>)/g, '<strong>$2</strong>');
 
     // Manipulate the DOM to display the content of the .txt file
-    document.getElementById('website_description').innerHTML = data;
+    document.getElementById('website-description').innerHTML = data;
   })
   .catch(error => {
     console.error('There was a problem fetching the .txt file:', error);
