@@ -148,15 +148,16 @@
     }
     #image2 {
         width:0px;
+        border: 0px solid #000000;
     }
     #summaryBox {
-    width: 80%;
-    font-size: 11px;
+        max-width: 98%;
+        font-size: 11px;
     }
     .output {
         justify-content: center;
         overflow-x: auto; /* Enable horizontal scrolling */
-        max-width: 85%;
+        max-width: 98%;
     }
     .table-caption {
         position: sticky; /* Make the first column sticky */
@@ -165,7 +166,15 @@
         font-size: 20px;
         font-weight: bold;
     }
-        /* Initially hide the dropdown content */
+    table {
+        width: 100%; /* Make the table take up 100% of the container's width */
+        border-collapse: collapse; /* Collapse borders for better appearance */
+        position: relative;
+        font-size: small;
+    }
+    th, td {
+        border: 1px solid #ccc; /* Add borders for visualization */
+    }
 }
 </style>
 </head>
