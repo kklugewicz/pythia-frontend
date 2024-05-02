@@ -27,12 +27,15 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-function main(mainData,compareData) {
-    var compareButtonDiv = document.getElementById("compare-button");
+function main(mainData,compareData,category_input) {
     var companyName = document.getElementById("company-title");
     var summaryDiv=document.getElementById('summary');
     var summaryBox=document.getElementById('summaryBox')
     var massContainer = document.getElementById("output-container");
+    var graphicContainer = document.getElementById('graphics');
+    while (graphicContainer.firstChild) {
+        graphicContainer.removeChild(graphicContainer.firstChild);
+    }
     while (massContainer.firstChild) {
         massContainer.removeChild(massContainer.firstChild);
     }
@@ -40,25 +43,8 @@ function main(mainData,compareData) {
     summaryDiv.innerHTML='';
     companyName.innerHTML='';
 
-    
-    compareButtonDiv.innerHTML = "";
-    var inputBox = document.createElement("input");
-    inputBox.type = "text";
-    inputBox.placeholder = "Enter tickers to compare:";
-    inputBox.id = "compareInput"; // Assign an ID to the input box
-    compareButtonDiv.appendChild(inputBox);
-    
-    var compareButton = document.createElement("button");
-    compareButton.innerHTML = "Compare";
-    
-    compareButton.addEventListener("click", function(event) {
-        event.preventDefault();
-        var outputDiv = document.getElementById("compare-button");
-        var inputValue = outputDiv.querySelector("#compareInput").value;
-        fetchDataCompare(inputValue, mainData); // Pass inputValue and data to fetchData2
-});
-    // Append the compare button to the output div
-    compareButtonDiv.appendChild(compareButton);
+    // Create compare button
+    compareButton(mainData);
 
     //extract data
     var mainBasics=mainData['Basics'];
@@ -115,14 +101,63 @@ function main(mainData,compareData) {
     };
 
     //create category order lists
-    var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
-    var IScategoryOrder=createList(mainIS, compareIS, 'IS');
-    var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
-    var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
-    var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
-    var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
-    var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
     
+    //create category order lists
+    if (category_input !== undefined) {
+        if (compareSummary!='n/a') {
+            var compareYears=orderDates(compareData)
+        }
+        category = category_input[0];
+        check = category_input[1];
+        type = category_input[2];
+        var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
+        var IScategoryOrder=createList(mainIS, compareIS, 'IS');
+        var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
+        var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
+        var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
+        var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
+        var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
+        if (check==0) {
+            if (type='IS') {
+                IScategoryOrder.splice(category)
+            }
+            if (type='ABS') {
+                ABScategoryOrder.splice(category)
+            }
+            if (type='CF') {
+                CFcategoryOrder.splice(category)
+            }
+        }
+        if (check==1) {
+            if (type='IS') {
+                IScategoryOrder.push(category)
+            }
+            if (type='ABS') {
+                ABScategoryOrder.push(category)
+            }
+            if (type='CF') {
+                CFcategoryOrder.push(category)
+            }
+        }
+    } else {
+        var mainYears=orderDates(mainData)
+        if (compareSummary!='n/a') {
+            var compareYears=orderDates(compareData)
+        }
+        var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
+        var IScategoryOrder=createList(mainIS, compareIS, 'IS');
+        var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
+        var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
+        var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
+        var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
+        var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
+    };
+    
+    
+    var precheckedItems = IScategoryOrder + ABScategoryOrder + LBScategoryOrder + TBScategoryOrder + CFcategoryOrder;
+    // Create a dropdown menu
+    //dropDown(mainData,compareData,precheckedItems);
+
     //create tables
     createTable(mainBasics,compareBasics, basicsCategoryOrder,'Basic Stock Info', mainCompanyName, compareCompanyName);
     createTable(mainIS,compareIS,IScategoryOrder,'Income Statement', mainCompanyName, compareCompanyName);
@@ -337,7 +372,6 @@ function openBox(header) {
     .catch(error => console.error('Error fetching file:', error));
 }
 
-
 function getColorForValue(value,category,year) {
     if (typeof value !== 'number' && typeof value !== 'string') {
         return '#e5e5ec '
@@ -408,7 +442,7 @@ function getColorForValue(value,category,year) {
         }
 
     };
-    if (year=='YoY(past year)'){
+    if (year=='YoY'){
         return '#e5e5ec '
     };
     if (!(category in valueRange)){
@@ -459,10 +493,10 @@ function createList(mainData,compareData,type) {
         }
     }
     else {
-        var data=mainData['YoY(past year)']
+        var data=mainData['YoY']
         
         if (compareData!='n/a') {
-            data2 =compareData['YoY(past year)']
+            data2 =compareData['YoY']
         }
         else {
             data2={}
@@ -491,4 +525,147 @@ function createList(mainData,compareData,type) {
         }
     }
     return endList;
+}
+
+function compareButton(mainData) {
+    var compareButtonDiv = document.getElementById("compare-button");
+    compareButtonDiv.innerHTML = "";
+    var inputBox = document.createElement("input");
+    inputBox.type = "text";
+    inputBox.placeholder = "Enter tickers to compare:";
+    inputBox.id = "compareInput"; // Assign an ID to the input box
+    compareButtonDiv.appendChild(inputBox);
+    
+    var compareButton = document.createElement("button");
+    compareButton.innerHTML = "Compare";
+    
+    compareButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        var outputDiv = document.getElementById("compare-button");
+        var inputValue = outputDiv.querySelector("#compareInput").value;
+        fetchDataCompare(inputValue, mainData); // Pass inputValue and data to fetchData2
+    });
+    // Append the compare button to the output div
+    compareButtonDiv.appendChild(compareButton);
+}
+
+function orderDates(data) {
+    // Extract keys from the object
+    const keys = Object.keys(data);
+
+    // Sort keys by date
+    keys.sort((a, b) => {
+        // Convert date strings to Date objects for comparison
+        const dateA = new Date(a);
+        const dateB = new Date(b);
+        return dateA - dateB;
+    });
+
+    // Move 'YoY' key to the end of the list
+    const index = keys.indexOf('YoY');
+    if (index !== -1) {
+        keys.push(keys.splice(index, 1)[0]);
+    }
+    return keys
+}
+
+
+function dropDown(mainData, compareData,precheckedItems) {
+    var dropdownContainer = document.querySelector(".dropdown");
+    while (dropdownContainer.firstChild) {
+        dropdownContainer.removeChild(dropdownContainer.firstChild);
+    };
+    var sidebar = document.querySelector('.sidebar');
+    sidebar.appendChild(dropdownContainer);
+   
+    // Create IS Dropdown
+    createDropdown("Income Statement Categories", mainData, compareData, dropdownContainer, 'IS',precheckedItems);
+
+    // Create BS Dropdown
+    createDropdown("Balance Sheet Categories", mainData, compareData, dropdownContainer, 'ABS',precheckedItems);
+
+    // Create CF Dropdown
+    createDropdown("Cash Flow Categories", mainData, compareData, dropdownContainer, 'CF',precheckedItems);
+}
+
+function createDropdown(title, AData, compareData, parent, type,precheckedItems) {
+    var dropdownMenuDiv = document.createElement('div');
+    dropdownMenuDiv.classList.add('dropdown-menu');
+    dropdownMenuDiv.dataset.type = type; // Add a data attribute to identify the dropdown type
+    parent.appendChild(dropdownMenuDiv);
+    
+    mainData = AData[type];
+    
+    var titleDiv = document.createElement("div");
+    titleDiv.innerHTML = title;
+    titleDiv.className = "dropdown-title";
+    titleDiv.dataset.type = type; // Add a data attribute to identify the dropdown type
+    titleDiv.addEventListener('click', function() {
+        toggleDropdownMenu(type);
+    });
+    parent.appendChild(titleDiv);
+    
+    years = Object.keys(mainData);
+    allCategories = years[0];
+    var listMain = Object.keys(mainData['YoY']);
+    var listCompare = compareData != 'n/a' ? Object.keys(compareData['YoY']) : [];
+    var allCategories = Array.from(new Set([...listMain, ...listCompare]));
+
+    allCategories.forEach(category => {
+        var checkboxLabel = document.createElement("label");
+        checkboxLabel.className = "dropdown-item";
+
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = category;
+
+        if (precheckedItems.includes(category)) {
+            checkbox.checked = true;
+        }
+
+        checkbox.addEventListener('change', function(event) {
+            var isChecked = event.target.checked ? 1 : 0;
+            console.log(category + ": " + isChecked);
+            // Trigger your custom function here
+            yourFunction(category, isChecked, AData, compareData,titleDiv);
+        });
+
+        var categoryName = document.createTextNode(category);
+        checkboxLabel.appendChild(checkbox);
+        checkboxLabel.appendChild(categoryName);
+
+        dropdownMenuDiv.appendChild(checkboxLabel);
+    });
+}
+
+function toggleDropdownMenu(type) {
+    var dropdownMenus = document.querySelectorAll('.dropdown-menu[data-type="' + type + '"]');
+    dropdownMenus.forEach(menu => {
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    });
+}
+
+document.addEventListener('click', function(event) {
+    var clickedElement = event.target;
+    var dropdownMenus = document.querySelectorAll('.dropdown-menu');
+
+    dropdownMenus.forEach(menu => {
+        // Check if the clicked element is inside the dropdown menu or its title
+        var isClickInsideMenu = menu.contains(clickedElement);
+        var isClickOnTitle = clickedElement.classList.contains('dropdown-title') && clickedElement.dataset.type === menu.dataset.type;
+
+        // If the click is outside the menu and its title, hide the menu
+        if (!isClickInsideMenu && !isClickOnTitle) {
+            menu.style.display = 'none';
+        }
+    });
+});
+
+function yourFunction(category, isChecked, mainData, compareData,titleDiv) {
+    // Implement your custom function here
+    var dataTypeValue = titleDiv.getAttribute('data-type');
+    var category_output = [category, isChecked, dataTypeValue];
+    console.log(category_output);
+    main(mainData,compareData, category_output);
+    // You can perform any other action based on the checkbox state change here
 }
