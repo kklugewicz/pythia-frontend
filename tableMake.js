@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("Ticker input value:", input);
         var data = { 'ticker': input, 'timeframe': timeframe };
         var compareData = 'n/a';
-        fetch('http://127.0.0.1:5000/main', {
+        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -47,7 +47,7 @@ function fetchDataCompare(inputValue, mainData){
     var data = {'ticker': inputValue};
     var timeframe = document.getElementById("timeframeSwitch").checked ? "Quarterly" : "Yearly"
     var data = { 'ticker': inputValue, 'timeframe': timeframe };
-    fetch('http://127.0.0.1:5000/main', {
+    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
