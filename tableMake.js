@@ -1,31 +1,67 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Your JavaScript code here
-    function fetchData(){
+    // Function to fetch data
+    function fetchData() {
         var input = document.getElementById("ticker").value;
+        var timeframe = document.getElementById("timeframeSwitch").checked ? "Quarterly" : "Yearly"
         console.log("Ticker input value:", input);
-        var data = {'ticker': input};
-        var compareData = 'n/a'
-        fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        var data = { 'ticker': input, 'timeframe': timeframe };
+        var compareData = 'n/a';
+        fetch('http://127.0.0.1:5000/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({data})
+            body: JSON.stringify({ data })
         })
         .then(response => response.json())
         .then(data => {
             // Process the received data
-            console.log("Received data:",data);
-            main(data,compareData); // Pass the received data to createISTable function
+            console.log("Received data:", data);
+            main(data, compareData); // Pass the received data to createISTable function
         })
         .catch(error => console.error('Error:', error));
     }
+    
 
+    // Event listener for form submission
     document.getElementById("tickerForm").addEventListener("submit", function(event) {
         event.preventDefault();
         fetchData();
     });
+
+    // Event listener for switch state change
+    var timeframeSwitch = document.getElementById("timeframeSwitch");
+    var switchLabel = document.getElementById("switchLabel");
+
+    timeframeSwitch.addEventListener("change", function() {
+        if (timeframeSwitch.checked) {
+            switchLabel.textContent = "Quarterly";
+        } else {
+            switchLabel.textContent = "Yearly";
+        }
+    });
 });
+
+function fetchDataCompare(inputValue, mainData){
+    console.log("Ticker input value:", inputValue);
+    var data = {'ticker': inputValue};
+    var timeframe = document.getElementById("timeframeSwitch").checked ? "Quarterly" : "Yearly"
+    var data = { 'ticker': inputValue, 'timeframe': timeframe };
+    fetch('http://127.0.0.1:5000/main', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Process the received data
+        console.log("Received data:",data);
+        main(mainData,data); // Pass the received data to createISTable function
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 function main(mainData,compareData,category_input) {
     var companyName = document.getElementById("company-title");
@@ -107,38 +143,59 @@ function main(mainData,compareData,category_input) {
         if (compareSummary!='n/a') {
             var compareYears=orderDates(compareData)
         }
+        //Call types
         category = category_input[0];
         check = category_input[1];
         type = category_input[2];
+        precheckedItems = category_input[3];
+
         var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
+        
         var IScategoryOrder=createList(mainIS, compareIS, 'IS');
+        console.log(precheckedItems)
+        IScategoryOrder = filterList(IScategoryOrder,precheckedItems);
         var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
+        ABScategoryOrder = filterList(ABScategoryOrder,precheckedItems);
         var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
+        LBScategoryOrder = filterList(LBScategoryOrder,precheckedItems);
         var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
+        TBScategoryOrder = filterList(TBScategoryOrder,precheckedItems);
         var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
+        CFcategoryOrder = filterList(CFcategoryOrder,precheckedItems);
         var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
         if (check==0) {
-            if (type='IS') {
-                IScategoryOrder.splice(category)
-            }
-            if (type='ABS') {
-                ABScategoryOrder.splice(category)
-            }
-            if (type='CF') {
-                CFcategoryOrder.splice(category)
-            }
-        }
+            if (type=='IS') {
+                index = IScategoryOrder.indexOf(category);
+                if (index > -1) {
+                    IScategoryOrder.splice(index, 1);
+                }
+            };
+            if (type=='BS') {
+                if (ABScategoryOrder.includes(category)) {
+                    ABScategoryOrder.splice(category,1);
+                } 
+                if (LBScategoryOrder.includes(category)) {
+                    LBScategoryOrder.splice(category,1);
+                } 
+                if (TBScategoryOrder.includes(category)) {
+                    TBScategoryOrder.splice(category,1);
+                } 
+            };
+            if (type=='CF') {
+                CFcategoryOrder.splice(category,1);
+            };
+        };
         if (check==1) {
-            if (type='IS') {
-                IScategoryOrder.push(category)
-            }
-            if (type='ABS') {
-                ABScategoryOrder.push(category)
-            }
-            if (type='CF') {
-                CFcategoryOrder.push(category)
-            }
-        }
+            if (type=='IS') {
+                IScategoryOrder.push(category,1);
+            };
+            if (type=='ABS') {
+                ABScategoryOrder.push(category,1);
+            };
+            if (type=='CF') {
+                CFcategoryOrder.push(category,1);
+            };
+        };
     } else {
         var mainYears=orderDates(mainData)
         if (compareSummary!='n/a') {
@@ -152,12 +209,12 @@ function main(mainData,compareData,category_input) {
         var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
         var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
     };
-    
-    
-    var precheckedItems = IScategoryOrder + ABScategoryOrder + LBScategoryOrder + TBScategoryOrder + CFcategoryOrder;
-    // Create a dropdown menu
-    //dropDown(mainData,compareData,precheckedItems);
 
+    var precheckedItems = IScategoryOrder.concat(ABScategoryOrder, LBScategoryOrder, TBScategoryOrder, CFcategoryOrder);
+
+    // Create a dropdown menu
+    dropDown(mainData,compareData,precheckedItems);
+    console.log(precheckedItems)
     //create tables
     createTable(mainBasics,compareBasics, basicsCategoryOrder,'Basic Stock Info', mainCompanyName, compareCompanyName);
     createTable(mainIS,compareIS,IScategoryOrder,'Income Statement', mainCompanyName, compareCompanyName);
@@ -314,25 +371,6 @@ function formatNumber(number) {
     }
 }    
 
-function fetchDataCompare(inputValue, mainData){
-    console.log("Ticker input value:", inputValue);
-    var data = {'ticker': inputValue};
-    fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Process the received data
-        console.log("Received data:",data);
-        main(mainData,data); // Pass the received data to createISTable function
-    })
-    .catch(error => console.error('Error:', error));
-}
-
 function openBox(header) {
     fetch('category_definitions.txt') // Fetch the generic text file
     .then(response => response.text())
@@ -445,6 +483,9 @@ function getColorForValue(value,category,year) {
     if (year=='YoY'){
         return '#e5e5ec '
     };
+    if (year=='QoQ'){
+        return '#e5e5ec '
+    };
     if (!(category in valueRange)){
         return '#e5e5ec '
     };
@@ -493,10 +534,11 @@ function createList(mainData,compareData,type) {
         }
     }
     else {
-        var data=mainData['YoY']
+        timeframe=checkType(mainData)
+        var data=mainData[timeframe]
         
         if (compareData!='n/a') {
-            data2 =compareData['YoY']
+            data2 =compareData[timeframe]
         }
         else {
             data2={}
@@ -562,7 +604,8 @@ function orderDates(data) {
     });
 
     // Move 'YoY' key to the end of the list
-    const index = keys.indexOf('YoY');
+    timeframe=checkType(data);
+    const index = keys.indexOf(timeframe);
     if (index !== -1) {
         keys.push(keys.splice(index, 1)[0]);
     }
@@ -607,8 +650,9 @@ function createDropdown(title, AData, compareData, parent, type,precheckedItems)
     
     years = Object.keys(mainData);
     allCategories = years[0];
-    var listMain = Object.keys(mainData['YoY']);
-    var listCompare = compareData != 'n/a' ? Object.keys(compareData['YoY']) : [];
+    timeframe=checkType(AData);
+    var listMain = Object.keys(mainData[timeframe]);
+    var listCompare = (typeof compareData === 'object' && compareData !== null && compareData !== 'n/a' && compareData[timeframe]) ? Object.keys(compareData[timeframe]) : [];
     var allCategories = Array.from(new Set([...listMain, ...listCompare]));
 
     allCategories.forEach(category => {
@@ -625,9 +669,8 @@ function createDropdown(title, AData, compareData, parent, type,precheckedItems)
 
         checkbox.addEventListener('change', function(event) {
             var isChecked = event.target.checked ? 1 : 0;
-            console.log(category + ": " + isChecked);
             // Trigger your custom function here
-            yourFunction(category, isChecked, AData, compareData,titleDiv);
+            yourFunction(category, isChecked, AData, compareData,titleDiv,precheckedItems);
         });
 
         var categoryName = document.createTextNode(category);
@@ -661,11 +704,39 @@ document.addEventListener('click', function(event) {
     });
 });
 
-function yourFunction(category, isChecked, mainData, compareData,titleDiv) {
+function yourFunction(category, isChecked, mainData, compareData,titleDiv,precheckedItems) {
     // Implement your custom function here
     var dataTypeValue = titleDiv.getAttribute('data-type');
-    var category_output = [category, isChecked, dataTypeValue];
-    console.log(category_output);
+    precheckedItems = precheckedItems.filter(item => item !== category);
+    var category_output = [category, isChecked, dataTypeValue,precheckedItems];
     main(mainData,compareData, category_output);
     // You can perform any other action based on the checkbox state change here
+}
+
+function filterList(unfilteredList, precheckedItems) {
+    // Filter the unfilteredList based on precheckedItems
+    return unfilteredList.filter(item => precheckedItems.includes(item));
+}
+
+function checkType(dictionary) {
+    // Check if the dictionary has the key 'ABS'
+    if ('ABS' in dictionary) {
+        // Check if 'YoY' exists in the 'ABS' object
+        if ('YoY' in dictionary['ABS']) {
+            return 'Yoy';
+        }
+        // Check if 'QoQ' exists in the 'ABS' object
+        else if ('QoQ' in dictionary['ABS']) {
+            return 'QoQ';
+        }
+    }
+    if ('YoY' in dictionary) {
+        return 'Yoy';
+    }
+    // Check if 'QoQ' exists in the 'ABS' object
+    else if ('QoQ' in dictionary) {
+        return 'QoQ';
+    }
+    // If 'ABS' doesn't exist or neither 'YoY' nor 'QoQ' exist, return null
+    return null;
 }
