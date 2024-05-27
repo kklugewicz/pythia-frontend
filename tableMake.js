@@ -285,26 +285,36 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
         tbody.appendChild(mainCompanyRow);
     };
 
-    // Create table body
-    Object.keys(data).forEach(function (year) {
-        var yearData = data[year];
+    Object.keys(data).sort(function(a, b) {
+        var yearA = parseInt(a.split(' ')[1]);
+        var yearB = parseInt(b.split(' ')[1]);
+        var quarterA = parseInt(a.split(' ')[0].slice(1));
+        var quarterB = parseInt(b.split(' ')[0].slice(1));
+    
+        if (yearA !== yearB) {
+            return yearA - yearB; // Sort by year first
+        } else {
+            return quarterA - quarterB; // Then sort by quarter within the same year
+        }
+    }).forEach(function (yearQuarter) {
+        var yearData = data[yearQuarter];
         var row = document.createElement('tr');
         var yearCell = document.createElement('td');
-        yearCell.textContent = year;
+        yearCell.textContent = yearQuarter;
         yearCell.style.border = "1px solid black";
         yearCell.style.backgroundColor = '#e5e5ec ';
         row.appendChild(yearCell);
-
+    
         categoryOrder.forEach(function (category, index) {
             var cell = document.createElement('td');
             var value = yearData[category];
-
+    
             cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
             cell.style.border = "1px solid black";
-            cell.style.backgroundColor = getColorForValue(value,category,year);
+            cell.style.backgroundColor = getColorForValue(value,category,yearQuarter);
             row.appendChild(cell);
         });
-
+    
         tbody.appendChild(row);
     });
 
