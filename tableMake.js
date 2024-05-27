@@ -723,7 +723,7 @@ function checkType(dictionary) {
     if ('ABS' in dictionary) {
         // Check if 'YoY' exists in the 'ABS' object
         if ('YoY' in dictionary['ABS']) {
-            return 'Yoy';
+            return 'YoY';
         }
         // Check if 'QoQ' exists in the 'ABS' object
         else if ('QoQ' in dictionary['ABS']) {
@@ -731,7 +731,7 @@ function checkType(dictionary) {
         }
     }
     if ('YoY' in dictionary) {
-        return 'Yoy';
+        return 'YoY';
     }
     // Check if 'QoQ' exists in the 'ABS' object
     else if ('QoQ' in dictionary) {
