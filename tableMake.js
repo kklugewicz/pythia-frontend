@@ -151,18 +151,18 @@ function main(mainData,compareData,category_input) {
 
         var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
         
-        var IScategoryOrder=createList(mainIS, compareIS, 'IS');
+        var IScategoryOrder=createListB(mainIS, compareIS, 'IS');
         console.log(precheckedItems)
         IScategoryOrder = filterList(IScategoryOrder,precheckedItems);
-        var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
+        var ABScategoryOrder=createListB(mainABS, compareABS, 'ABS');
         ABScategoryOrder = filterList(ABScategoryOrder,precheckedItems);
-        var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
+        var LBScategoryOrder=createListB(mainLBS, compareLBS, 'LBS');
         LBScategoryOrder = filterList(LBScategoryOrder,precheckedItems);
-        var TBScategoryOrder=createList(mainTBS, compareTBS, 'TBS');
+        var TBScategoryOrder=createListB(mainTBS, compareTBS, 'TBS');
         TBScategoryOrder = filterList(TBScategoryOrder,precheckedItems);
-        var CFcategoryOrder=createList(mainCF, compareCF, 'CF');
+        var CFcategoryOrder=createListB(mainCF, compareCF, 'CF');
         CFcategoryOrder = filterList(CFcategoryOrder,precheckedItems);
-        var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
+        var valuationsCategoryOrder=createListB(mainValuations, compareValuations, 'Valuations');
         if (check==0) {
             if (type=='IS') {
                 index = IScategoryOrder.indexOf(category);
@@ -187,13 +187,13 @@ function main(mainData,compareData,category_input) {
         };
         if (check==1) {
             if (type=='IS') {
-                IScategoryOrder.push(category,1);
+                IScategoryOrder.push(category);
             };
             if (type=='ABS') {
-                ABScategoryOrder.push(category,1);
+                ABScategoryOrder.push(category);
             };
             if (type=='CF') {
-                CFcategoryOrder.push(category,1);
+                CFcategoryOrder.push(category);
             };
         };
     } else {
@@ -544,6 +544,7 @@ function createList(mainData,compareData,type) {
         }
     }
     else {
+        console.log(timeframe);
         timeframe=checkType(mainData)
         var data=mainData[timeframe]
         
@@ -572,6 +573,41 @@ function createList(mainData,compareData,type) {
     
     var endList=[];
     for (let element of categoryOrder) {
+        if (dataCat1.includes(element) || dataCat2.includes(element)) {
+            endList.push(element);
+        }
+    }
+    return endList;
+}
+
+function createListB(mainData,compareData,type) {
+    if (type=='Valuations') {
+        data=mainData['current']
+        if (compareData!='n/a') {
+            data2 =compareData['current']
+        }
+        else {
+            data2={}
+        }
+    }
+    else {
+        console.log(timeframe);
+        timeframe=checkType(mainData)
+        var data=mainData[timeframe]
+        
+        if (compareData!='n/a') {
+            data2 =compareData[timeframe]
+        }
+        else {
+            data2={}
+    }
+    }
+    
+    var dataCat1=Object.keys(data);
+    var dataCat2 = Object.keys(data2);
+    
+    var endList=[];
+    for (let element of dataCat1) {
         if (dataCat1.includes(element) || dataCat2.includes(element)) {
             endList.push(element);
         }
