@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("Ticker input value:", input);
         var data = { 'ticker': input, 'timeframe': timeframe };
         var compareData = 'n/a';
+        
         fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+        //fetch('http://127.0.0.1:5000/main', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -48,6 +50,7 @@ function fetchDataCompare(inputValue, mainData){
     var timeframe = document.getElementById("timeframeSwitch").checked ? "Quarterly" : "Yearly"
     var data = { 'ticker': inputValue, 'timeframe': timeframe };
     fetch('https://pythia-14fbe9516611.herokuapp.com/main', {
+    //fetch('http://127.0.0.1:5000/main', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -152,7 +155,6 @@ function main(mainData,compareData,category_input) {
         var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
         
         var IScategoryOrder=createListB(mainIS, compareIS, 'IS');
-        console.log(precheckedItems)
         IScategoryOrder = filterList(IScategoryOrder,precheckedItems);
         var ABScategoryOrder=createListB(mainABS, compareABS, 'ABS');
         ABScategoryOrder = filterList(ABScategoryOrder,precheckedItems);
@@ -162,7 +164,7 @@ function main(mainData,compareData,category_input) {
         TBScategoryOrder = filterList(TBScategoryOrder,precheckedItems);
         var CFcategoryOrder=createListB(mainCF, compareCF, 'CF');
         CFcategoryOrder = filterList(CFcategoryOrder,precheckedItems);
-        var valuationsCategoryOrder=createListB(mainValuations, compareValuations, 'Valuations');
+        var valuationsCategoryOrder=createList(mainValuations, compareValuations, 'Valuations');
         if (check==0) {
             if (type=='IS') {
                 index = IScategoryOrder.indexOf(category);
@@ -201,7 +203,7 @@ function main(mainData,compareData,category_input) {
         if (compareSummary!='n/a') {
             var compareYears=orderDates(compareData)
         }
-        var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price']
+        var basicsCategoryOrder=['Industry','Market Cap', 'Current Stock Price', 'Annual Dividend']
         var IScategoryOrder=createList(mainIS, compareIS, 'IS');
         var ABScategoryOrder=createList(mainABS, compareABS, 'ABS');
         var LBScategoryOrder=createList(mainLBS, compareLBS, 'LBS');
@@ -308,7 +310,9 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
         categoryOrder.forEach(function (category, index) {
             var cell = document.createElement('td');
             var value = yearData[category];
-    
+            if (String(value).indexOf('nan') !== -1) {
+                value = "n/a"
+            };
             cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
             cell.style.border = "1px solid black";
             cell.style.backgroundColor = getColorForValue(value,category,yearQuarter);
@@ -421,6 +425,9 @@ function openBox(header) {
 }
 
 function getColorForValue(value,category,year) {
+    if (value == 'n/a') {
+        return '#e5e5ec '
+    }
     if (typeof value !== 'number' && typeof value !== 'string') {
         return '#e5e5ec '
     };
@@ -556,7 +563,7 @@ function createList(mainData,compareData,type) {
     }
     }
     if (type=='IS') {
-        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'EBITDA','Basic EPS', 'Net Earnings to Total'];
+        var categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %','Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'Basic EPS', 'Net Earnings to Total'];
     } if (type=='ABS') {
         var categoryOrder = ['Cash And Cash Equivalents','Inventory', 'Receivables','Current Assets','Current Ratio','Fixed Asset Turnover Ratio','Total Non Current Assets','Total Assets','Return on Asset Ratio'];
     } if (type=='LBS') {
@@ -580,38 +587,36 @@ function createList(mainData,compareData,type) {
     return endList;
 }
 
-function createListB(mainData,compareData,type) {
-    if (type=='Valuations') {
-        data=mainData['current']
-        if (compareData!='n/a') {
-            data2 =compareData['current']
-        }
-        else {
-            data2={}
-        }
-    }
-    else {
+function createListB(mainData, compareData, type) {
+    let data, data2, timeframe;
+    const categoryOrder = ['SGA%', 'R&D%', 'Depreciation %', 'Operating Expense %', 'Interest Expense %', 'Operating Margin', 'Total Revenue', 'Cost Of Revenue', 'Gross Profit', 'Gross Profit Margin', 'Pretax Income', 'Net Earnings', 'EBITDA', 'Basic EPS', 'Net Earnings to Total', 'Cash And Cash Equivalents', 'Inventory', 'Receivables', 'Current Assets', 'Current Ratio', 'Fixed Asset Turnover Ratio', 'Total Non Current Assets', 'Total Assets', 'Return on Asset Ratio', 'Payables And Accrued Expenses', 'Current Debt', 'Long Term Debt', 'Current Liabilities', 'Total Non Current Liabilities Net Minority Interest', 'Total Liabilities Net Minority Interest', 'Net Debt', 'Total Debt', 'Debt to Shareholders Equity Ratio', 'Common Stock', 'Retained Earnings', 'Stockholders Equity', 'Return on Shareholders Equity', 'Free Cash Flow', 'Net Income', 'Net Income From Continuing Operations', 'Capital Expenditures %', 'Net Common Stock Issuance', 'Current Stock Price', 'Market Cap', 'Trailing P/E', 'Forward P/E', 'Trailing PEG Ratio', 'P/FCF', 'Discounted Cash Flow Model', 'Peter Lynchs Valuation', 'Benjamin Grahams Valuation', 'Multiples Valuation', 'Dividend Discount Model'];
+
+    if (type == 'Valuations') {
+        data = mainData['current'];
+        data2 = compareData != 'n/a' ? compareData['current'] : {};
+    } else {
         console.log(timeframe);
-        timeframe=checkType(mainData)
-        var data=mainData[timeframe]
-        
-        if (compareData!='n/a') {
-            data2 =compareData[timeframe]
-        }
-        else {
-            data2={}
+        timeframe = checkType(mainData);
+        data = mainData[timeframe];
+        data2 = compareData != 'n/a' ? compareData[timeframe] : {};
     }
-    }
-    
-    var dataCat1=Object.keys(data);
-    var dataCat2 = Object.keys(data2);
-    
-    var endList=[];
-    for (let element of dataCat1) {
+
+    let dataCat1 = Object.keys(data);
+    let dataCat2 = Object.keys(data2);
+
+    let endList = [];
+    // Add elements from categoryOrder first
+    for (let element of categoryOrder) {
         if (dataCat1.includes(element) || dataCat2.includes(element)) {
             endList.push(element);
         }
     }
+    // Add any remaining elements from dataCat1 and dataCat2
+    for (let element of dataCat1) {
+            if (!categoryOrder.includes(element) && (dataCat1.includes(element) || dataCat2.includes(element))) {
+                endList.push(element);
+            }
+        }
     return endList;
 }
 
@@ -760,8 +765,10 @@ function yourFunction(category, isChecked, mainData, compareData,titleDiv,preche
 }
 
 function filterList(unfilteredList, precheckedItems) {
-    // Filter the unfilteredList based on precheckedItems
-    return unfilteredList.filter(item => precheckedItems.includes(item));
+    // Create a Set from precheckedItems for efficient lookup
+    const precheckedSet = new Set(precheckedItems);
+    // Filter the unfilteredList while retaining the original order
+    return unfilteredList.filter(item => precheckedSet.has(item));
 }
 
 function checkType(dictionary) {
