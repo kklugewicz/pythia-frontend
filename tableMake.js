@@ -21,9 +21,11 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Received data:", data);
             main(data, compareData); // Pass the received data to createISTable function
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching data. Please try again later.');
+        });
     }
-    
 
     // Event listener for form submission
     document.getElementById("tickerForm").addEventListener("submit", function(event) {
@@ -63,7 +65,10 @@ function fetchDataCompare(inputValue, mainData){
         console.log("Received data:",data);
         main(mainData,data); // Pass the received data to createISTable function
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error)
+        alert('An error occurred while fetching data. Please try again later.');
+    });
 }
 
 function main(mainData,compareData,category_input) {
@@ -227,24 +232,24 @@ function main(mainData,compareData,category_input) {
     createTable(mainValuations,compareValuations,valuationsCategoryOrder,'Valuation Models', mainCompanyName, compareCompanyName);
 }
 
-function createTable(data,compareData,categoryOrder,title,mainCompanyName,compareCompanyName) {
-    var tableContainer=document.createElement("div")
+function createTable(data, compareData, categoryOrder, title, mainCompanyName, compareCompanyName) {
+    var tableContainer = document.createElement("div");
     tableContainer.classList.add('output');
-    var contentContainer=document.querySelector(".content");
-    var massContainer=document.getElementById('output-container');
+    var contentContainer = document.querySelector(".content");
+    var massContainer = document.getElementById('output-container');
 
-    //Create variables for table elements
+    // Create variables for table elements
     var table = document.createElement('table');
     var thead = document.createElement('thead');
     var tbody = document.createElement('tbody');
 
-    //Edit Style
-    table.style.borderCollapse = "collapse"; 
+    // Edit Style
+    table.style.borderCollapse = "collapse";
     table.style.marginLeft = 'auto';
     table.style.marginRight = 'auto';
 
-    //Create caption
-    var caption=document.createElement('div')
+    // Create caption
+    var caption = document.createElement('div');
     caption.innerHTML = title;
     caption.classList.add('table-caption');
     massContainer.appendChild(caption);
@@ -256,15 +261,15 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
     var yearHeader = document.createElement('th');
     yearHeader.textContent = 'Year';
     yearHeader.style.border = "1px solid black";
-    yearHeader.style.backgroundColor = '#e5e5ec ';
+    yearHeader.style.backgroundColor = '#e5e5ec';
     headerRow.appendChild(yearHeader);
 
     // Add other headers in the specified order
-    categoryOrder.forEach(function(header) {
+    categoryOrder.forEach(function (header) {
         var th = document.createElement('th');
         th.textContent = header;
         th.style.border = "1px solid black";
-        th.style.backgroundColor = '#e5e5ec ';
+        th.style.backgroundColor = '#e5e5ec';
         headerRow.appendChild(th);
 
         th.addEventListener('click', function () {
@@ -276,23 +281,23 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
     table.appendChild(thead);
 
     // Create row for "main company"
-    if (compareCompanyName!='n/a') {
+    if (compareCompanyName != 'n/a') {
         var mainCompanyRow = document.createElement('tr');
         var mainCompanyCell = document.createElement('td');
         mainCompanyCell.textContent = mainCompanyName;
         mainCompanyCell.style.border = "1px solid black";
-        mainCompanyCell.style.backgroundColor = '#e5e5ec ';
+        mainCompanyCell.style.backgroundColor = '#e5e5ec';
         mainCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
         mainCompanyRow.appendChild(mainCompanyCell);
         tbody.appendChild(mainCompanyRow);
-    };
+    }
 
-    Object.keys(data).sort(function(a, b) {
+    Object.keys(data).sort(function (a, b) {
         var yearA = parseInt(a.split(' ')[1]);
         var yearB = parseInt(b.split(' ')[1]);
         var quarterA = parseInt(a.split(' ')[0].slice(1));
         var quarterB = parseInt(b.split(' ')[0].slice(1));
-    
+
         if (yearA !== yearB) {
             return yearA - yearB; // Sort by year first
         } else {
@@ -304,40 +309,47 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
         var yearCell = document.createElement('td');
         yearCell.textContent = yearQuarter;
         yearCell.style.border = "1px solid black";
-        yearCell.style.backgroundColor = '#e5e5ec ';
+        yearCell.style.backgroundColor = '#e5e5ec';
         row.appendChild(yearCell);
-    
+
+        var naCount = 0;
+
         categoryOrder.forEach(function (category, index) {
             var cell = document.createElement('td');
             var value = yearData[category];
             if (String(value).indexOf('nan') !== -1) {
-                value = "n/a"
-            };
+                value = "n/a";
+            }
+            if (value === "n/a") {
+                naCount++;
+            }
             cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
             cell.style.border = "1px solid black";
-            cell.style.backgroundColor = getColorForValue(value,category,yearQuarter);
+            cell.style.backgroundColor = getColorForValue(value, category, yearQuarter);
             row.appendChild(cell);
         });
-    
-        tbody.appendChild(row);
+
+        if (naCount <= categoryOrder.length - 1 && naCount < 5) {
+            tbody.appendChild(row);
+        }
     });
 
     table.appendChild(tbody);
 
     // Create row for "other company"
-    if (compareCompanyName!='n/a') {
+    if (compareCompanyName != 'n/a') {
         var otherCompanyRow = document.createElement('tr');
         var otherCompanyCell = document.createElement('td');
         otherCompanyCell.textContent = compareCompanyName;
-        otherCompanyCell.style.backgroundColor = '#e5e5ec ';
+        otherCompanyCell.style.backgroundColor = '#e5e5ec';
         otherCompanyCell.style.border = "1px solid black";
         otherCompanyCell.colSpan = categoryOrder.length + 1; // Span all columns
         otherCompanyRow.appendChild(otherCompanyCell);
         tbody.appendChild(otherCompanyRow);
-    };
+    }
 
-    //Create table body for comparison
-    if (compareCompanyName!='n/a') {
+    // Create table body for comparison
+    if (compareCompanyName != 'n/a') {
         var data2Keys = Object.keys(compareData);
         var startIdx = Math.max(data2Keys.length - 2, 0); // Start from the last two years or 0 if less than two years
         data2Keys.slice(startIdx).forEach(function (year) {
@@ -345,22 +357,32 @@ function createTable(data,compareData,categoryOrder,title,mainCompanyName,compar
             var row = document.createElement('tr');
             var yearCell = document.createElement('td');
             yearCell.textContent = year;
-            yearCell.style.backgroundColor = '#e5e5ec ';
+            yearCell.style.backgroundColor = '#e5e5ec';
             yearCell.style.border = "1px solid black";
             row.appendChild(yearCell);
-    
+
+            var naCount = 0;
+
             categoryOrder.forEach(function (category, index) {
                 var cell = document.createElement('td');
                 var value = yearData[category];
+                if (String(value).indexOf('nan') !== -1) {
+                    value = "n/a";
+                }
+                if (value === "n/a") {
+                    naCount++;
+                }
                 cell.textContent = (typeof value === 'number') ? formatNumber(value) : value || '';
                 cell.style.border = "1px solid black";
-                cell.style.backgroundColor = getColorForValue(value,category,year);
+                cell.style.backgroundColor = getColorForValue(value, category, year);
                 row.appendChild(cell);
             });
-    
-            tbody.appendChild(row);
+
+            if (naCount <= categoryOrder.length - 1 && naCount <= 5) {
+                tbody.appendChild(row);
+            }
         });
-    
+
         table.appendChild(tbody);
     }
 
