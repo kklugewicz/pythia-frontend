@@ -313,4 +313,19 @@ input:checked + .slider:before {
     th, td {
         border: 1px solid #ccc; /* Add borders for visualization */
     }
+    #customAlertBox {
+        width: 100%;
+        height: auto; /* Adjust height as needed */
+        max-width: 90%; /* Override default max-width for mobile */
+        max-height: 100%; /* Override default max-height for mobile */
+        transform: translate(0, 0); /* Remove centering transform */
+        top: 30%;
+        left: 0;
+        right: 0; /* Make sure it takes full width */
+        margin: 0 auto; /* Center horizontally */
+    }
+
+    #customAlertBox pre {
+        max-height: calc(100% - 60px); /* Ensure the pre element does not overflow the box */
+    }
 }
