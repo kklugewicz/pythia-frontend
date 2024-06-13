@@ -408,42 +408,55 @@ function formatNumber(number) {
 }    
 
 function openBox(header) {
-    fetch('category_definitions.txt') // Fetch the generic text file
+    fetch('category_definitions.txt')
     .then(response => response.text())
     .then(data => {
-        // Split the content by '!' to separate different sections
-        var sections = data.split('!');
-        
-        // Iterate through each section
-        for (var i = 0; i < sections.length; i++) {
-            var lines = sections[i].split('\n'); // Split section into lines
-            
-            // Find the header within the lines of the current section
-            var headerIndex = lines.findIndex(line => line.trim() === header);
-            
-            // If header is found
+        const sections = data.split('!');
+
+        for (let section of sections) {
+            const lines = section.split('\n');
+            const headerIndex = lines.findIndex(line => line.trim() === header);
+
             if (headerIndex !== -1) {
-                var output = ''; // Initialize output string
-                
-                // Iterate through lines starting from the line after the header
-                for (var j = headerIndex + 1; j < lines.length; j++) {
-                    // If line is not empty and does not contain '!'
-                    if (lines[j].trim() !== '') {
-                        output += lines[j] + '\n'; // Add line to output
+                let output = '';
+
+                for (let i = headerIndex + 1; i < lines.length; i++) {
+                    if (lines[i].trim() !== '') {
+                        output += formatText(lines[i]) + '\n';
                     } else {
-                        break; // Exit loop if empty line or '!' is encountered
+                        break;
                     }
                 }
-                
-                alert(output); // Show an alert with the output
-                return; // Exit the function
+
+                showCustomAlert(header, output);
+                return;
             }
         }
-        
-        // If header is not found
-        alert('Header not found!');
+
+        showCustomAlert('Error', 'Header not found!');
     })
     .catch(error => console.error('Error fetching file:', error));
+}
+
+function formatText(line) {
+    const boldWords = ['Definition:', 'Equation:', 'Why is it important:'];
+    for (let word of boldWords) {
+        const regex = new RegExp(`(${word})`, 'g');
+        line = line.replace(regex, '<strong>$1</strong>');
+    }
+    return line;
+}
+
+function showCustomAlert(header, content) {
+    document.getElementById('customAlertHeader').textContent = header;
+    document.getElementById('customAlertContent').innerHTML = content;
+    document.getElementById('customAlertOverlay').style.display = 'block';
+    document.getElementById('customAlertBox').style.display = 'block';
+}
+
+function closeCustomAlert() {
+    document.getElementById('customAlertOverlay').style.display = 'none';
+    document.getElementById('customAlertBox').style.display = 'none';
 }
 
 function getColorForValue(value,category,year) {
